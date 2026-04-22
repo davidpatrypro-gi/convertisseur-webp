@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Convertir JPG PNG en WebP gratuitement | ConvertWebP{% endblock %}
+{% block description %}Convertissez vos images JPG et PNG au format WebP gratuitement. Réduisez le poids de vos images jusqu'à 90% pour booster votre SEO et la vitesse de votre site.{% endblock %}
+{% block canonical %}https://convertwebp.fr/{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "ConvertWebP",
+  "url": "https://convertwebp.fr",
+  "description": "Convertissez vos images JPG et PNG au format WebP gratuitement. Réduisez le poids de vos images jusqu'à 90% pour booster votre SEO.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "fr",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <h1>Convertir vos images<br><em>JPG &amp; PNG en WebP</em> gratuitement</h1>
+    <p>Réduisez le poids de vos images jusqu'à 90% sans perte de qualité visible. Boostez votre SEO et la vitesse de votre site en quelques clics.</p>
+    <div class="hero-badges">
+      <span class="hero-badge">✓ 100% gratuit</span>
+      <span class="hero-badge">✓ Sans inscription</span>
+      <span class="hero-badge">✓ Upload multiple</span>
+      <span class="hero-badge">✓ Données non conservées</span>
+    </div>
+    <a href="#tool" class="btn btn-lg" style="background:white;color:var(--primary);">
+      Convertir mes images maintenant ↓
+    </a>
+  </div>
+</section>
+
+<!-- ── Tool ──────────────────────────────────────────────────────────────────── -->
+<section class="tool-section" id="tool">
+  <div class="container">
+    <div class="tool-layout">
+
+      <!-- Left: upload + results -->
+      <div>
+        <!-- Drop zone -->
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
+             aria-label="Déposez ou cliquez pour uploader vos images">
+          <div class="drop-icon">🖼️</div>
+          <h2>Déposez vos images ici</h2>
+          <p>ou cliquez pour sélectionner vos fichiers JPG / PNG</p>
+          <input type="file" id="file-input" accept=".jpg,.jpeg,.png"
+                 multiple style="display:none" aria-hidden="true">
+          <button class="btn btn-primary" type="button">Choisir des fichiers</button>
+          <p class="drop-formats">JPG, JPEG, PNG · plusieurs fichiers acceptés</p>
+        </div>
+
+        <!-- File list -->
+        <div class="file-list hidden" id="file-list"></div>
+
+        <!-- Convert button -->
+        <button class="btn btn-primary btn-full hidden" id="convert-btn"
+                style="margin-top:1rem" type="button">
+          ⚡ Convertir en WebP
+        </button>
+
+        <!-- Progress -->
+        <div class="progress-wrap hidden" id="progress-wrap">
+          <div class="progress-text" id="progress-text">Conversion en cours…</div>
+          <div class="progress-track">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- Stats globales -->
+        <div class="hidden" id="stats-container">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">📁 Poids original</div>
+              <div class="stat-value" id="stat-original">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">🌐 Poids WebP</div>
+              <div class="stat-value" id="stat-converted">—</div>
+            </div>
+            <div class="stat-card stat-gain">
+              <div class="stat-label">💾 Gain total</div>
+              <div class="stat-value" id="stat-gain">—</div>
+            </div>
+            <div class="stat-card stat-gain">
+              <div class="stat-label">📉 Réduction</div>
+              <div class="stat-value" id="stat-pct">—</div>
+            </div>
+          </div>
+
+          <!-- ZIP button -->
+          <div class="zip-wrap hidden" id="zip-wrap">
+            <button class="btn btn-success btn-full" id="zip-btn" type="button">
+              ⬇ Télécharger toutes les images en ZIP
+            </button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-grid" id="results-container"></div>
+      </div>
+
+      <!-- Right: options -->
+      <aside class="options-panel">
+        <h3>⚙️ Options de conversion</h3>
+        <div class="option-group">
+          <div class="option-label">
+            <span>Qualité WebP</span>
+            <span class="quality-val" id="quality-value">80</span>
+          </div>
+          <input type="range" id="quality-slider" class="slider"
+                 min="1" max="100" value="80" aria-label="Qualité WebP">
+          <div class="slider-hints">
+            <span>Léger</span>
+            <span>Équilibré</span>
+            <span>Qualité max</span>
+          </div>
+        </div>
+        <p class="option-hint">
+          <strong>80</strong> est la valeur recommandée : qualité visuelle excellente
+          avec une réduction de poids maximale. Descendez à <strong>60</strong> pour
+          des miniatures, montez à <strong>95</strong> pour des images haute qualité.
+        </p>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ──────────────────────────────────────────────────────────────── -->
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Pourquoi convertir en WebP ?</h2>
+    <p class="section-sub">Le format WebP est recommandé par Google pour booster vos performances web.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Jusqu'à 90% plus léger</h3>
+        <p>WebP offre une compression jusqu'à 34% meilleure que JPEG et 80% meilleure que PNG à qualité visuelle équivalente.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>SEO amélioré</h3>
+        <p>Google intègre la vitesse de chargement dans son algorithme. Des images légères = meilleur LCP = meilleur classement.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Compatible partout</h3>
+        <p>97% des navigateurs supportent WebP en 2024 : Chrome, Firefox, Safari, Edge. Aucun problème de compatibilité.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Blog teaser ────────────────────────────────────────────────────────────── -->
+<section class="blog-section">
+  <div class="container">
+    <h2 class="section-title">Guides &amp; Ressources SEO</h2>
+    <p class="section-sub">Tout ce que vous devez savoir sur l'optimisation d'images.</p>
+    <div class="blog-grid">
+      <article class="blog-card">
+        <div class="blog-card-img" style="background:#EEF2FF">📈</div>
+        <div class="blog-card-body">
+          <span class="blog-tag">SEO</span>
+          <h3>Pourquoi convertir vos images en WebP est essentiel pour votre SEO</h3>
+          <p>Découvrez comment le format WebP peut améliorer votre LCP, réduire votre taux de rebond et booster votre classement Google.</p>
+          <a href="/blog/pourquoi-convertir-images-webp-seo" class="blog-card-link">Lire l'article →</a>
+        </div>
+      </article>
+      <article class="blog-card">
+        <div class="blog-card-img" style="background:#F0FDF4">🔬</div>
+        <div class="blog-card-body">
+          <span class="blog-tag">Comparatif</span>
+          <h3>WebP vs JPG vs PNG : quel format choisir pour vos images web ?</h3>
+          <p>Analyse comparative des trois formats d'image principaux du web : avantages, inconvénients et recommandations.</p>
+          <a href="/blog/webp-vs-jpg-png-comparaison" class="blog-card-link">Lire l'article →</a>
+        </div>
+      </article>
+      <article class="blog-card">
+        <div class="blog-card-img" style="background:#FFF7ED">🚀</div>
+        <div class="blog-card-body">
+          <span class="blog-tag">Performance</span>
+          <h3>5 techniques pour optimiser vos images et booster la vitesse de votre site</h3>
+          <p>WebP, lazy loading, srcset, compression intelligente : guide complet pour des images ultra-optimisées.</p>
+          <a href="/blog/optimiser-images-vitesse-site-google" class="blog-card-link">Lire l'article →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/script.js"></script>
+{% endblock %}

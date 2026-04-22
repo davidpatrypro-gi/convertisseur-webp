@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}5 techniques pour optimiser vos images et booster la vitesse de votre site{% endblock %}
+{% block description %}WebP, lazy loading, srcset, redimensionnement et compression intelligente : guide complet des meilleures techniques d'optimisation d'images pour améliorer votre score PageSpeed.{% endblock %}
+{% block canonical %}https://convertwebp.fr/blog/optimiser-images-vitesse-site-google{% endblock %}
+{% block og_url %}https://convertwebp.fr/blog/optimiser-images-vitesse-site-google{% endblock %}
+{% block og_title %}5 techniques pour optimiser vos images et booster la vitesse de votre site{% endblock %}
+{% block og_description %}Guide complet : WebP, lazy loading, srcset, compression et redimensionnement pour améliorer votre score PageSpeed Google.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "5 techniques pour optimiser vos images et booster la vitesse de votre site",
+  "description": "Guide complet des meilleures techniques d'optimisation d'images : WebP, lazy loading, srcset, compression et redimensionnement.",
+  "url": "https://convertwebp.fr/blog/optimiser-images-vitesse-site-google",
+  "datePublished": "2024-01-25",
+  "dateModified": "2024-01-25",
+  "inLanguage": "fr",
+  "author": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
+  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="article-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/">Accueil</a><span>›</span>
+      <a href="/blog">Blog</a><span>›</span>
+      <span style="opacity:.9">Optimisation images</span>
+    </nav>
+    <p class="article-meta">📅 Janvier 2024 · ⏱ 7 min de lecture · 🏷 Performance</p>
+    <h1>5 techniques pour optimiser vos images<br>et booster la vitesse de votre site</h1>
+  </div>
+</section>
+
+<article class="article-body">
+
+  <p>Les images représentent en moyenne <strong>65% du poids total d'une page web</strong>. Ce sont elles qui font le plus souffrir les temps de chargement et, par conséquent, votre positionnement sur Google. Pourtant, optimiser ses images reste l'un des leviers les plus sous-estimés du SEO technique. Dans ce guide, nous vous présentons 5 techniques concrètes pour réduire le poids de vos images sans sacrifier leur qualité et booster les performances de votre site.</p>
+
+  <h2>Pourquoi la vitesse de chargement est cruciale en 2024</h2>
+
+  <h3>Impact sur le référencement Google</h3>
+  <p>Depuis mai 2021, Google intègre les <strong>Core Web Vitals</strong> dans son algorithme de classement. Ces métriques mesurent l'expérience utilisateur réelle de votre site :</p>
+  <ul>
+    <li><strong>LCP (Largest Contentful Paint)</strong> : temps d'affichage du contenu principal — souvent une image</li>
+    <li><strong>FID / INP (Interaction to Next Paint)</strong> : réactivité aux interactions</li>
+    <li><strong>CLS (Cumulative Layout Shift)</strong> : stabilité visuelle de la page</li>
+  </ul>
+  <p>Le LCP est particulièrement impacté par les images. Une image hero non optimisée peut faire grimper votre LCP à 5 ou 6 secondes. Google considère qu'un <strong>bon LCP est inférieur à 2,5 secondes</strong> — un objectif difficile à atteindre avec des images lourdes.</p>
+
+  <h3>Impact sur l'expérience utilisateur et les conversions</h3>
+  <p>Au-delà du référencement, la vitesse de chargement influence directement le comportement de vos visiteurs. Selon Google, <strong>53% des utilisateurs mobiles quittent une page qui prend plus de 3 secondes à charger</strong>. Une étude Amazon a montré que chaque 100 millisecondes de délai supplémentaire coûtait 1% de ventes. La performance, c'est du chiffre d'affaires.</p>
+
+  <h2>Les images, principale cause de lenteur</h2>
+  <p>Lors d'un audit de performance, les images arrivent presque toujours en tête des optimisations à effectuer. Les problèmes les plus fréquents :</p>
+  <ul>
+    <li>Images surdimensionnées (une photo 4000×3000 px affichée en 400×300 px)</li>
+    <li>Format inadapté (PNG lourd pour une simple photographie)</li>
+    <li>Absence de compression (images exportées directement depuis l'appareil photo)</li>
+    <li>Pas de lazy loading (toutes les images chargées dès le démarrage)</li>
+    <li>Absence de srcset (même image haute résolution pour mobile et desktop)</li>
+  </ul>
+  <p>Résoudre ces problèmes peut réduire le poids de vos pages de <strong>50 à 80%</strong> et améliorer drastiquement votre score PageSpeed.</p>
+
+  <h2>5 techniques pour optimiser vos images</h2>
+
+  <h3>1. Adoptez le format WebP</h3>
+  <p>C'est la technique la plus impactante. Le format WebP, développé par Google, offre une compression 25 à 34% meilleure que JPEG et jusqu'à 80% meilleure que PNG, pour une qualité visuelle identique. C'est le seul format recommandé par Google dans ses outils Lighthouse et PageSpeed Insights sous la mention "Diffusez des images dans des formats nouvelle génération".</p>
+  <p>Notre outil <strong>ConvertWebP</strong> vous permet de convertir gratuitement et en masse vos images JPG et PNG en WebP en quelques secondes — sans inscription ni installation.</p>
+
+  <h3>2. Compressez intelligemment</h3>
+  <p>La compression ne se fait pas au détriment de la qualité si elle est bien calibrée. Quelques repères :</p>
+  <ul>
+    <li><strong>Qualité 80–85%</strong> en WebP : recommandé pour la plupart des images — imperceptible à l'œil nu</li>
+    <li><strong>Qualité 60–75%</strong> : acceptable pour les miniatures, vignettes et images de fond</li>
+    <li><strong>Qualité 90–95%</strong> : pour les images produits où les détails fins comptent</li>
+  </ul>
+  <p>Évitez de compresser plusieurs fois successivement une image lossy : chaque cycle dégrade la qualité. Partez toujours de la source originale haute qualité.</p>
+
+  <h3>3. Redimensionnez avant d'uploader</h3>
+  <p>Uploader une image de 5000×3000 pixels pour une zone qui n'affiche que 1200×800 pixels, c'est charger 6 fois plus de données que nécessaire. Avant d'uploader, redimensionnez vos images à la taille maximale à laquelle elles seront affichées.</p>
+  <p>Pour un article de blog affiché sur 800px de large, une image de <strong>1600px</strong> (×2 pour les écrans Retina) est amplement suffisante. Inutile d'aller au-delà.</p>
+
+  <h3>4. Utilisez le lazy loading</h3>
+  <p>Le lazy loading (chargement différé) consiste à ne charger les images que lorsqu'elles entrent dans le viewport de l'utilisateur. C'est désormais possible nativement en HTML avec l'attribut <code>loading="lazy"</code> :</p>
+  <pre><code>&lt;img src="image.webp" alt="Description de l'image" loading="lazy"&gt;</code></pre>
+  <p>Cette simple ligne évite de charger les images "sous la ligne de flottaison" au démarrage de la page. Sur une page longue avec 20 images, cela peut réduire le temps de chargement initial de 50 à 70%.</p>
+
+  <h3>5. Implémentez srcset pour le responsive</h3>
+  <p>L'attribut <code>srcset</code> permet au navigateur de choisir automatiquement la taille d'image adaptée à la résolution et la taille de l'écran :</p>
+  <pre><code>&lt;img
+  src="image-800.webp"
+  srcset="image-400.webp 400w,
+          image-800.webp 800w,
+          image-1600.webp 1600w"
+  sizes="(max-width: 600px) 400px,
+         (max-width: 1200px) 800px,
+         1600px"
+  alt="Description"
+  loading="lazy"&gt;</code></pre>
+  <p>Un utilisateur mobile ne téléchargera que l'image de 400px, économisant ainsi 75% de données par rapport à l'image desktop. Combined avec le format WebP, le gain est considérable.</p>
+
+  <h2>Mesurer vos performances avec Google PageSpeed</h2>
+  <p>Avant et après vos optimisations, utilisez <a href="https://pagespeed.web.dev" target="_blank" rel="noopener">Google PageSpeed Insights</a> pour mesurer l'impact de vos actions. Cet outil analyse votre site et vous donne un score de 0 à 100 pour mobile et desktop, ainsi que des recommandations précises.</p>
+  <p>Parmi les recommandations les plus fréquentes, vous trouverez : <em>"Diffusez des images dans des formats nouvelle génération"</em> — c'est exactement ce que permet la conversion en WebP. Un audit avant/après optimisation complète peut révéler un gain de <strong>20 à 40 points</strong> sur votre score de performance mobile.</p>
+
+  <div class="article-cta">
+    <h3>Commencez par convertir vos images en WebP</h3>
+    <p>C'est la première étape, la plus rapide et la plus impactante. Notre outil gratuit traite plusieurs fichiers simultanément et vous fournit un ZIP téléchargeable en quelques secondes.</p>
+    <a href="/#tool" class="btn btn-primary btn-lg">⚡ Optimiser mes images maintenant</a>
+  </div>
+
+</article>
+{% endblock %}

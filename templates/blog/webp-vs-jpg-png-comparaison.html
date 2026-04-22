@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}WebP vs JPG vs PNG : quel format choisir pour vos images web ?{% endblock %}
+{% block description %}Comparaison complète des formats WebP, JPG et PNG : avantages, inconvénients, tableau comparatif et recommandations selon votre type d'image.{% endblock %}
+{% block canonical %}https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison{% endblock %}
+{% block og_url %}https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison{% endblock %}
+{% block og_title %}WebP vs JPG vs PNG : quel format choisir pour vos images web ?{% endblock %}
+{% block og_description %}Analyse complète des trois formats d'image web : tableau comparatif et recommandations pratiques.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "WebP vs JPG vs PNG : quel format choisir pour vos images web ?",
+  "description": "Comparaison complète des formats WebP, JPG et PNG avec tableau comparatif et recommandations.",
+  "url": "https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison",
+  "datePublished": "2024-01-20",
+  "dateModified": "2024-01-20",
+  "inLanguage": "fr",
+  "author": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
+  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="article-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/">Accueil</a><span>›</span>
+      <a href="/blog">Blog</a><span>›</span>
+      <span style="opacity:.9">Comparatif formats</span>
+    </nav>
+    <p class="article-meta">📅 Janvier 2024 · ⏱ 6 min de lecture · 🏷 Comparatif</p>
+    <h1>WebP, JPG ou PNG :<br>quel format choisir pour vos images web ?</h1>
+  </div>
+</section>
+
+<article class="article-body">
+
+  <p>Choisir le bon format d'image est une décision technique qui a des conséquences directes sur la vitesse de votre site et votre référencement. JPEG, PNG, WebP : chaque format a ses forces et ses faiblesses, et le choix dépend du type d'image et de l'usage. Dans cet article, nous comparons ces trois formats pour vous aider à faire le meilleur choix et optimiser les performances de votre site web.</p>
+
+  <h2>Le format JPEG : le standard historique du web</h2>
+  <p>Introduit en 1992 par le Joint Photographic Experts Group, le JPEG (ou JPG) est devenu le format de référence pour les photographies sur internet. Sa popularité s'explique par son excellent rapport qualité/compression pour les images photographiques complexes.</p>
+
+  <h3>Avantages du JPEG</h3>
+  <ul>
+    <li>Compression efficace pour les photographies et images avec beaucoup de couleurs</li>
+    <li>Support universel sur tous les navigateurs et applications, y compris les plus anciens</li>
+    <li>Taille de fichier raisonnable pour des photos de qualité acceptable</li>
+    <li>Idéal pour les images avec de nombreux dégradés et transitions de couleurs</li>
+  </ul>
+
+  <h3>Inconvénients du JPEG</h3>
+  <ul>
+    <li>Compression avec pertes : chaque enregistrement dégrade légèrement la qualité</li>
+    <li>Ne supporte pas la transparence (canal alpha) — fond blanc ou coloré obligatoire</li>
+    <li>Moins performant que WebP à qualité visuelle équivalente</li>
+    <li>Rendu médiocre pour les images contenant du texte, des lignes nettes ou des aplats</li>
+  </ul>
+
+  <h2>Le format PNG : la qualité sans compromis</h2>
+  <p>Créé en 1996 comme alternative libre de droits au GIF, le PNG (Portable Network Graphics) est devenu incontournable pour les images nécessitant de la transparence ou une qualité parfaite.</p>
+
+  <h3>Avantages du PNG</h3>
+  <ul>
+    <li>Compression sans pertes : aucune dégradation de la qualité, même après de multiples sauvegardes</li>
+    <li>Support natif de la transparence (canal alpha 8 bits)</li>
+    <li>Idéal pour les logos, captures d'écran, illustrations et icônes</li>
+    <li>Rendu parfait du texte et des lignes nettes à fort contraste</li>
+  </ul>
+
+  <h3>Inconvénients du PNG</h3>
+  <ul>
+    <li>Fichiers considérablement plus lourds que JPEG et WebP pour les photographies</li>
+    <li>Moins adapté aux images photographiques (rapport qualité/poids défavorable)</li>
+    <li>Un simple logo en PNG peut facilement peser 5 à 10 fois plus qu'en WebP lossless</li>
+    <li>Pas de compression avec pertes native — pas d'option pour arbitrer qualité/poids</li>
+  </ul>
+
+  <h2>Le format WebP : le format du web moderne</h2>
+  <p>Développé par Google et publié en 2010, WebP est conçu dès le départ pour le web. Il combine les avantages du JPEG et du PNG dans un seul format universel, en surpassant les deux dans la plupart des cas d'usage.</p>
+
+  <h3>Avantages du WebP</h3>
+  <ul>
+    <li><strong>Compression lossy</strong> (comme JPEG) : 25–34% plus léger que JPEG à qualité visuelle égale</li>
+    <li><strong>Compression lossless</strong> (comme PNG) : 26% plus léger que PNG</li>
+    <li><strong>Transparence</strong> (comme PNG) : 22% plus léger que PNG transparent</li>
+    <li><strong>Animations</strong> (comme GIF) : jusqu'à 10–20× plus léger qu'un GIF animé</li>
+    <li>Un seul format pour tous les besoins : photos, logos, icônes, animations</li>
+  </ul>
+
+  <h3>Compatibilité navigateurs en 2024</h3>
+  <p>Le WebP bénéficie d'un support de plus de <strong>97% des navigateurs mondiaux</strong>. Chrome, Firefox, Safari (depuis 2020), Edge, Opera et tous les navigateurs mobiles modernes le gèrent nativement. Seul Internet Explorer (moins de 0,5% du marché) ne le supporte pas.</p>
+
+  <h2>Tableau comparatif des trois formats</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Critère</th>
+        <th>JPEG</th>
+        <th>PNG</th>
+        <th>WebP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Type de compression</td><td>Lossy</td><td>Lossless</td><td>Lossy + Lossless</td></tr>
+      <tr><td>Poids (photo)</td><td>Référence</td><td>3–5× plus lourd</td><td>25–34% plus léger</td></tr>
+      <tr><td>Poids (logo/icône)</td><td>Mauvais rendu</td><td>Référence</td><td>26% plus léger</td></tr>
+      <tr><td>Transparence</td><td>❌</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Animations</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      <tr><td>Qualité texte &amp; lignes</td><td>Médiocre</td><td>Excellente</td><td>Excellente</td></tr>
+      <tr><td>Support navigateurs</td><td>100%</td><td>100%</td><td>97%+</td></tr>
+      <tr><td>Recommandé par Google</td><td>Non</td><td>Non</td><td>✅ Oui</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Quel format choisir selon votre situation ?</h2>
+  <p>La réponse courte : <strong>choisissez WebP dans la grande majorité des cas</strong>. Voici nos recommandations selon le type d'image :</p>
+  <ul>
+    <li><strong>Photographies</strong> (produits, portraits, paysages) → WebP lossy, qualité 75–85%</li>
+    <li><strong>Logos &amp; icônes</strong> → WebP lossless ou SVG (pour la mise à l'échelle parfaite)</li>
+    <li><strong>Images avec transparence</strong> → WebP avec canal alpha</li>
+    <li><strong>Captures d'écran &amp; illustrations</strong> → WebP lossless</li>
+    <li><strong>Images à conserver et éditer</strong> → PNG ou TIFF comme source, WebP pour l'export web</li>
+  </ul>
+  <p>Dans tous les cas, conservez toujours vos fichiers sources en PNG ou TIFF haute qualité, et exportez en WebP uniquement pour le web.</p>
+
+  <div class="article-cta">
+    <h3>Prêt à passer au WebP ?</h3>
+    <p>Notre convertisseur gratuit transforme vos JPG et PNG en WebP en quelques secondes, sans inscription ni installation requise.</p>
+    <a href="/#tool" class="btn btn-primary btn-lg">⚡ Convertir mes images gratuitement</a>
+  </div>
+
+</article>
+{% endblock %}

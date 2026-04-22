@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{% block title %}Convertir JPG PNG en WebP gratuitement | ConvertWebP{% endblock %}</title>
+  <meta name="description" content="{% block description %}Convertissez vos images JPG et PNG au format WebP gratuitement. Réduisez le poids de vos images jusqu'à 90% pour booster votre SEO et la vitesse de votre site.{% endblock %}">
+  <link rel="canonical" href="{% block canonical %}https://convertwebp.fr/{% endblock %}">
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="ConvertWebP">
+  <meta property="og:title"       content="{% block og_title %}Convertir JPG PNG en WebP gratuitement | ConvertWebP{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Convertissez vos images JPG et PNG au format WebP gratuitement. Réduisez le poids de vos images jusqu'à 90%.{% endblock %}">
+  <meta property="og:url"         content="{% block og_url %}https://convertwebp.fr/{% endblock %}">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="{% block tw_title %}Convertir JPG PNG en WebP | ConvertWebP{% endblock %}">
+  <meta name="twitter:description" content="{% block tw_description %}Convertissez vos images gratuitement en WebP et gagnez jusqu'à 90% de poids.{% endblock %}">
+
+  <!-- Structured data -->
+  {% block json_ld %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr"
+  }
+  </script>
+  {% endblock %}
+
+  <link rel="stylesheet" href="/static/style.css">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <nav class="nav container">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-icon">W</div>
+      ConvertWebP
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Outil</a></li>
+      <li><a href="/blog">Blog SEO</a></li>
+    </ul>
+    <a href="/#tool" class="btn btn-primary btn-sm">Convertir maintenant</a>
+  </nav>
+</header>
+
+<!-- ── Content ─────────────────────────────────────────────────────────────── -->
+{% block content %}{% endblock %}
+
+<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span class="footer-logo">ConvertWebP</span>
+    <nav class="footer-links">
+      <a href="/">Outil</a>
+      <a href="/blog">Blog</a>
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/politique-confidentialite">Confidentialité</a>
+    </nav>
+    <span class="footer-copy">© 2024 ConvertWebP — Gratuit &amp; sans inscription</span>
+  </div>
+</footer>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
