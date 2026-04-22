@@ -267,8 +267,10 @@ a:hover { text-decoration: underline; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
   box-shadow: var(--shadow); transition: transform var(--transition), box-shadow var(--transition);
+  position: relative; cursor: pointer;
 }
 .blog-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.blog-card:hover .blog-card-link { text-decoration: underline; }
 .blog-card-img   { height: 160px; display: grid; place-items: center; font-size: 3rem; }
 .blog-card-body  { padding: 1.25rem; }
 .blog-tag {
@@ -280,6 +282,12 @@ a:hover { text-decoration: underline; }
 .blog-card p  { font-size: .875rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; }
 .blog-card-link { font-size: .875rem; font-weight: 600; color: var(--primary); }
 .blog-card-link:hover { text-decoration: none; color: var(--primary-dark); }
+/* Stretched link — rend toute la carte cliquable */
+.blog-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
 
 /* ── Article ────────────────────────────────────────────────────────────────── */
 .article-hero  { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; padding: 3.5rem 0; }
