@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show *)",
+      "Bash(python -c \"import streamlit_analytics2; help\\(streamlit_analytics2.stop_tracking\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c \"import streamlit_analytics2; import inspect; print\\(inspect.getsource\\(streamlit_analytics2\\)\\)\")",
+      "Bash(python -c \"import streamlit_analytics2; import inspect; src = inspect.getsource\\(streamlit_analytics2.stop_tracking\\); print\\(src\\)\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
