@@ -1,9 +1,105 @@
 import io
 import zipfile
 
+import altair as alt
+import pandas as pd
 import streamlit as st
 import streamlit_analytics2 as streamlit_analytics
+import streamlit_analytics2.display as _sa2_display
+import streamlit_analytics2.utils as _sa2_utils
 from PIL import Image
+
+
+def _show_results_fr(data, reset_callback, unsafe_password=None):
+    """Version française de streamlit_analytics2.display.show_results."""
+    st.title("Tableau de bord Analytics")
+    st.markdown(
+        "Vous consultez les statistiques de l'application. "
+        "Retirez `?analytics=on` de l'URL pour revenir à l'app."
+    )
+
+    show = True
+    if unsafe_password is not None:
+        password_input = st.text_input("Mot de passe", type="password")
+        if password_input != unsafe_password:
+            show = False
+            if len(password_input) > 0:
+                st.write("Mot de passe incorrect.")
+
+    if show:
+        st.header("Trafic")
+        st.write(f"depuis le {data['start_time']}")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Pages vues", data["total_pageviews"],
+                    help="Chaque fois qu'un utilisateur charge la page.")
+        col2.metric("Interactions", data["total_script_runs"],
+                    help="Chaque fois que Streamlit relance le script.")
+        col3.metric("Temps passé", _sa2_utils.format_seconds(data["total_time_seconds"]),
+                    help="Temps total cumulé sur tous les utilisateurs.")
+        st.write("")
+
+        df = pd.DataFrame(data["per_day"])
+        if pd.to_datetime(df["days"]).dt.year.nunique() > 1:
+            x_axis_ticks = "yearmonthdate(days):O"
+        else:
+            x_axis_ticks = "monthdate(days):O"
+
+        base = alt.Chart(df).encode(
+            x=alt.X(x_axis_ticks, axis=alt.Axis(title="", grid=True))
+        )
+        line1 = base.mark_line(point=True, stroke="#5276A7").encode(
+            alt.Y("pageviews:Q", axis=alt.Axis(
+                titleColor="#5276A7", tickColor="#5276A7",
+                labelColor="#5276A7", format=".0f", tickMinStep=1,
+            ), scale=alt.Scale(domain=(0, df["pageviews"].max() + 1)))
+        )
+        line2 = base.mark_line(point=True, stroke="#57A44C").encode(
+            alt.Y("script_runs:Q", axis=alt.Axis(
+                title="interactions", titleColor="#57A44C",
+                tickColor="#57A44C", labelColor="#57A44C",
+                format=".0f", tickMinStep=1,
+            ))
+        )
+        st.altair_chart(
+            alt.layer(line1, line2)
+            .resolve_scale(y="independent")
+            .configure_axis(titleFontSize=15, labelFontSize=12, titlePadding=10),
+            use_container_width=True,
+        )
+
+        st.header("Interactions par widget")
+        for i in data["widgets"].keys():
+            st.markdown(f"##### Widget `{i}`")
+            if isinstance(data["widgets"][i], dict):
+                st.dataframe(
+                    pd.DataFrame({
+                        "widget": i,
+                        "valeur": list(data["widgets"][i].keys()),
+                        "interactions": data["widgets"][i].values(),
+                    }).sort_values(by="interactions", ascending=False)
+                )
+            else:
+                st.dataframe(
+                    pd.DataFrame({
+                        "widget": i,
+                        "interactions": data["widgets"][i],
+                    }, index=[0])
+                )
+
+        st.header("Zone dangereuse")
+        with st.expander("Réinitialiser les statistiques"):
+            st.write("**Attention : cette action effacera toutes les données de suivi.**")
+            choix = st.selectbox("Continuer ?", [
+                "Non, annuler",
+                "Oui, je veux réinitialiser",
+            ])
+            if choix == "Oui, je veux réinitialiser":
+                if st.button("Confirmer la réinitialisation"):
+                    reset_callback()
+                    st.write("Réinitialisation effectuée. Rechargez la page.")
+
+
+_sa2_display.show_results = _show_results_fr
 
 st.set_page_config(page_title="Convertisseur WebP", layout="wide")
 
