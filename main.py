@@ -35,43 +35,37 @@ def _to_webp(content: bytes, quality: int) -> bytes:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/mentions-legales", response_class=HTMLResponse)
 async def mentions_legales(request: Request):
-    return templates.TemplateResponse("mentions-legales.html", {"request": request})
+    return templates.TemplateResponse(request, "mentions-legales.html")
 
 
 @app.get("/politique-confidentialite", response_class=HTMLResponse)
 async def politique_confidentialite(request: Request):
-    return templates.TemplateResponse("politique-confidentialite.html", {"request": request})
+    return templates.TemplateResponse(request, "politique-confidentialite.html")
 
 
 @app.get("/blog", response_class=HTMLResponse)
 async def blog(request: Request):
-    return templates.TemplateResponse("blog/index.html", {"request": request})
+    return templates.TemplateResponse(request, "blog/index.html")
 
 
 @app.get("/blog/pourquoi-convertir-images-webp-seo", response_class=HTMLResponse)
 async def blog_webp_seo(request: Request):
-    return templates.TemplateResponse(
-        "blog/pourquoi-convertir-images-webp-seo.html", {"request": request}
-    )
+    return templates.TemplateResponse(request, "blog/pourquoi-convertir-images-webp-seo.html")
 
 
 @app.get("/blog/webp-vs-jpg-png-comparaison", response_class=HTMLResponse)
 async def blog_webp_vs(request: Request):
-    return templates.TemplateResponse(
-        "blog/webp-vs-jpg-png-comparaison.html", {"request": request}
-    )
+    return templates.TemplateResponse(request, "blog/webp-vs-jpg-png-comparaison.html")
 
 
 @app.get("/blog/optimiser-images-vitesse-site-google", response_class=HTMLResponse)
 async def blog_optimiser(request: Request):
-    return templates.TemplateResponse(
-        "blog/optimiser-images-vitesse-site-google.html", {"request": request}
-    )
+    return templates.TemplateResponse(request, "blog/optimiser-images-vitesse-site-google.html")
 
 
 # ── API ────────────────────────────────────────────────────────────────────────
