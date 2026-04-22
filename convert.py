@@ -2,9 +2,12 @@ import io
 import zipfile
 
 import streamlit as st
+import streamlit_analytics2 as streamlit_analytics
 from PIL import Image
 
 st.set_page_config(page_title="Convertisseur WebP", layout="wide")
+
+streamlit_analytics.start_tracking()
 
 st.title("🕸️ Convertisseur JPG/PNG vers WebP")
 st.write("Transformez vos images au format WebP pour booster votre SEO.")
@@ -98,3 +101,5 @@ if uploaded_files:
                     mime="image/webp",
                     key=uploaded_file.name,
                 )
+
+streamlit_analytics.stop_tracking()
