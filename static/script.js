@@ -125,6 +125,11 @@ async function convertAll() {
     statsContainer.classList.remove('hidden');
     zipWrap.classList.remove('hidden');
     statsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const totalGain = convertedResults.reduce(
+      (s, r) => s + (r.original_size - r.converted_size), 0
+    );
+    scheduleTpPopup(totalGain);
   }
 }
 
@@ -199,6 +204,82 @@ function renderStats() {
   statConverted.textContent = fmtSize(conv);
   statGain.textContent      = fmtSize(gain);
   statPct.textContent       = pct + '%';
+}
+
+// ── Trustpilot popup ──────────────────────────────────────────────────────────
+const TP_URL        = 'https://fr.trustpilot.com/review/convertwebp.fr';
+const TP_LATER_KEY  = 'tp_later_until';
+const TP_DONE_KEY   = 'tp_reviewed';
+const TP_DELAY_MS   = 3000;
+const TP_SNOOZE_DAYS = 7;
+
+function shouldShowTpPopup() {
+  if (localStorage.getItem(TP_DONE_KEY)) return false;
+  const until = localStorage.getItem(TP_LATER_KEY);
+  if (until && Date.now() < parseInt(until, 10)) return false;
+  return true;
+}
+
+function scheduleTpPopup(savedBytes) {
+  if (!shouldShowTpPopup()) return;
+  setTimeout(() => showTpPopup(savedBytes), TP_DELAY_MS);
+}
+
+function showTpPopup(savedBytes) {
+  if (!shouldShowTpPopup()) return;
+
+  const saved = fmtSize(savedBytes);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'tp-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'tp-title');
+  overlay.innerHTML = `
+    <div class="tp-popup">
+      <div class="tp-popup-stars">★★★★★</div>
+      <h2 class="tp-popup-title" id="tp-title">Votre avis compte !</h2>
+      <p class="tp-popup-body">
+        Vous venez d'économiser <strong>${saved}</strong>&nbsp;!<br>
+        Si l'outil vous a plu, 30 secondes sur Trustpilot nous aident énormément.
+      </p>
+      <div class="tp-popup-cta">
+        <a href="${TP_URL}" target="_blank" rel="noopener"
+           class="tp-btn-review" id="tp-btn-review">
+          Laisser un avis ⭐
+        </a>
+        <button class="tp-btn-later" id="tp-btn-later">Plus tard</button>
+      </div>
+      <div class="tp-popup-logo">Trustpilot</div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Close on overlay click (outside popup)
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) snoozeTp(overlay);
+  });
+
+  document.getElementById('tp-btn-review').addEventListener('click', () => {
+    localStorage.setItem(TP_DONE_KEY, '1');
+    closeTp(overlay);
+  });
+
+  document.getElementById('tp-btn-later').addEventListener('click', () => {
+    snoozeTp(overlay);
+  });
+}
+
+function snoozeTp(overlay) {
+  const until = Date.now() + TP_SNOOZE_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(TP_LATER_KEY, until.toString());
+  closeTp(overlay);
+}
+
+function closeTp(overlay) {
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .2s ease';
+  setTimeout(() => overlay.remove(), 200);
 }
 
 // ── Downloads ──────────────────────────────────────────────────────────────────
