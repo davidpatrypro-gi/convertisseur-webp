@@ -443,11 +443,11 @@ a:hover { text-decoration: underline; }
 
 /* ── FAQ ─────────────────────────────────────────────────────────────────────── */
 .faq-section {
-  padding: 80px 20px;
-  background: #0f0f1a;
+  padding: 20px 20px 80px;
+  background: #ffffff;
 }
-.faq-section .section-title { color: #ffffff; }
-.faq-section .section-sub   { color: #8888a8; }
+.faq-section .section-title { color: var(--text); }
+.faq-section .section-sub   { color: var(--text-muted); }
 .faq-list { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
 .faq-item {
