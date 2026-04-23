@@ -222,6 +222,7 @@ function shouldShowTpPopup() {
 
 function scheduleTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
+  console.log('popup déclenché dans ' + TP_DELAY_MS + 'ms (gain : ' + fmtSize(savedBytes) + ')');
   setTimeout(() => showTpPopup(savedBytes), TP_DELAY_MS);
 }
 
