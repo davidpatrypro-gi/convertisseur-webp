@@ -352,19 +352,40 @@ a:hover { text-decoration: underline; }
 
 /* ── Trustpilot banner ───────────────────────────────────────────────────────── */
 .tp-banner {
-  display: flex; align-items: center; justify-content: center;
-  gap: .6rem; padding: .55rem 1rem;
-  background: #F4F4F4; border-bottom: 1px solid #E2E8F0;
-  text-decoration: none; color: var(--text);
-  font-size: .875rem; transition: background var(--transition);
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: .5rem; padding: 8px 16px;
+  background: #ffffff; border-bottom: 1px solid #e8e8e8;
+  text-decoration: none; color: #1a1a1a;
+  font-size: 13px; line-height: 1;
+  transition: background var(--transition);
 }
-.tp-banner:hover { background: #EBEBEB; text-decoration: none; }
-.tp-logo  { font-weight: 800; color: #00B67A; letter-spacing: -.3px; }
-.tp-stars { color: #00B67A; font-size: 1rem; letter-spacing: 1px; line-height: 1; }
-.tp-text  { font-weight: 600; }
-.tp-sep   { color: var(--text-muted); }
-.tp-cta   { color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-.tp-banner:hover .tp-cta { color: var(--primary-dark); }
+.tp-banner:hover { background: #fafafa; text-decoration: none; }
+
+/* Logo : étoile SVG + "Trustpilot" */
+.tp-brand       { display: flex; align-items: center; gap: 5px; }
+.tp-brand-star  { width: 20px; height: 20px; flex-shrink: 0; }
+.tp-brand-name  { font-size: 13px; font-weight: 700; color: #1a1a1a; letter-spacing: -.2px; }
+
+/* Séparateur vertical */
+.tp-divider {
+  width: 1px; height: 16px;
+  background: #e0e0e0; margin: 0 4px;
+}
+
+/* 5 étoiles carrées */
+.tp-stars { display: flex; align-items: center; gap: 2px; }
+.tp-star  { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* Score + label */
+.tp-score { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-left: 2px; }
+.tp-label { font-size: 13px; color: #1a1a1a; }
+
+/* Séparateur texte */
+.tp-sep   { font-size: 13px; color: #c0c0c0; margin: 0 4px; }
+
+/* CTA */
+.tp-cta   { font-size: 13px; font-weight: 600; color: #00b67a; }
+.tp-banner:hover .tp-cta { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ── Trustpilot popup ────────────────────────────────────────────────────────── */
 .tp-overlay {

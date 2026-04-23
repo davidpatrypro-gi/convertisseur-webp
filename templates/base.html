@@ -59,12 +59,38 @@
 
 <!-- ── Bandeau Trustpilot ───────────────────────────────────────────────────── -->
 <a href="https://fr.trustpilot.com/review/convertwebp.fr"
-   target="_blank" rel="noopener" class="tp-banner" aria-label="Voir nos avis Trustpilot">
-  <span class="tp-logo">Trustpilot</span>
-  <span class="tp-stars" aria-hidden="true">★★★★★</span>
-  <span class="tp-text">Excellent</span>
-  <span class="tp-sep" aria-hidden="true">·</span>
-  <span class="tp-cta">Donnez votre avis</span>
+   target="_blank" rel="noopener" class="tp-banner" aria-label="Voir nos avis Trustpilot — Note 4.9 Excellent">
+
+  <!-- Logo : étoile + texte -->
+  <span class="tp-brand">
+    <svg class="tp-brand-star" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="20" height="20" fill="#00b67a"/>
+      <path d="M10 2l2.06 5.17 5.55.37-4.28 3.55 1.38 5.77L10 13.5l-4.71 3.36 1.38-5.77L2.39 7.54l5.55-.37Z" fill="white"/>
+    </svg>
+    <span class="tp-brand-name">Trustpilot</span>
+  </span>
+
+  <span class="tp-divider" aria-hidden="true"></span>
+
+  <!-- 5 étoiles carrées style Trustpilot -->
+  <span class="tp-stars" role="img" aria-label="5 étoiles sur 5">
+    {% for _ in range(5) %}
+    <svg class="tp-star" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="20" height="20" fill="#00b67a"/>
+      <path d="M10 2l2.06 5.17 5.55.37-4.28 3.55 1.38 5.77L10 13.5l-4.71 3.36 1.38-5.77L2.39 7.54l5.55-.37Z" fill="white"/>
+    </svg>
+    {% endfor %}
+  </span>
+
+  <!-- Score + label -->
+  <span class="tp-score">4.9</span>
+  <span class="tp-label">Excellent</span>
+
+  <span class="tp-sep" aria-hidden="true">|</span>
+
+  <!-- CTA -->
+  <span class="tp-cta">Donnez votre avis&nbsp;→</span>
+
 </a>
 
 <!-- ── Content ─────────────────────────────────────────────────────────────── -->
