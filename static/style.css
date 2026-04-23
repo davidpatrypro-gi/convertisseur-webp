@@ -353,7 +353,7 @@ a:hover { text-decoration: underline; }
 /* ── Trustpilot banner ───────────────────────────────────────────────────────── */
 .tp-banner {
   display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
-  gap: .5rem; padding: 8px 16px;
+  gap: 12px; padding: 8px 16px;
   background: #ffffff; border-bottom: 1px solid #e8e8e8;
   text-decoration: none; color: #1a1a1a;
   font-size: 13px; line-height: 1;
@@ -367,21 +367,18 @@ a:hover { text-decoration: underline; }
 .tp-brand-name  { font-size: 13px; font-weight: 700; color: #1a1a1a; letter-spacing: -.2px; }
 
 /* Séparateur vertical */
-.tp-divider {
-  width: 1px; height: 16px;
-  background: #e0e0e0; margin: 0 4px;
-}
+.tp-divider { width: 1px; height: 16px; background: #e0e0e0; }
 
 /* 5 étoiles carrées */
 .tp-stars { display: flex; align-items: center; gap: 2px; }
 .tp-star  { width: 20px; height: 20px; flex-shrink: 0; }
 
 /* Score + label */
-.tp-score { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-left: 2px; }
+.tp-score { font-size: 13px; font-weight: 700; color: #1a1a1a; }
 .tp-label { font-size: 13px; color: #1a1a1a; }
 
 /* Séparateur texte */
-.tp-sep   { font-size: 13px; color: #c0c0c0; margin: 0 4px; }
+.tp-sep   { font-size: 13px; color: #c0c0c0; }
 
 /* CTA */
 .tp-cta   { font-size: 13px; font-weight: 600; color: #00b67a; }
