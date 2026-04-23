@@ -442,37 +442,42 @@ a:hover { text-decoration: underline; }
 .footer-copy { font-size: .875rem; }
 
 /* ── FAQ ─────────────────────────────────────────────────────────────────────── */
-.faq-section { padding: 4rem 0 5rem; background: var(--bg); }
-.faq-list    { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: .75rem; }
+.faq-section {
+  padding: 80px 20px;
+  background: #0f0f1a;
+}
+.faq-section .section-title { color: #ffffff; }
+.faq-section .section-sub   { color: #8888a8; }
+.faq-list { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
 .faq-item {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
+  background: #2a2a3e; border: 1px solid #3a3a5e;
+  border-radius: 12px; overflow: hidden;
+  transition: background var(--transition);
 }
-.faq-item[open] { border-color: var(--primary-light); }
+.faq-item:hover         { background: #333355; }
+.faq-item[open]         { background: #2a2a3e; border-color: #6c63ff; }
+.faq-item[open]:hover   { background: #333355; }
 
 .faq-question {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1.1rem 1.25rem;
-  font-size: 1rem; font-weight: 600; color: var(--text);
+  padding: 24px 28px;
+  font-size: 17px; font-weight: 600; color: #ffffff;
   cursor: pointer; list-style: none; user-select: none;
-  transition: background var(--transition);
 }
 .faq-question::-webkit-details-marker { display: none; }
 .faq-question::after {
-  content: '+'; font-size: 1.4rem; font-weight: 300;
-  color: var(--primary); line-height: 1; flex-shrink: 0;
+  content: '+'; font-size: 1.5rem; font-weight: 300;
+  color: #6c63ff; line-height: 1; flex-shrink: 0; margin-left: 1rem;
   transition: transform var(--transition);
 }
-.faq-item[open] .faq-question { background: #EEF2FF; }
 .faq-item[open] .faq-question::after { transform: rotate(45deg); }
-.faq-question:hover { background: var(--bg); }
 
 .faq-answer {
-  padding: 0 1.25rem 1.1rem;
-  border-top: 1px solid var(--border);
+  padding: 0 28px 24px;
+  border-top: 1px solid #3a3a5e;
 }
-.faq-answer p { margin: .9rem 0 0; color: var(--text-muted); line-height: 1.7; }
+.faq-answer p { margin: 16px 0 0; color: #b0b0c0; font-size: 15px; line-height: 1.7; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
