@@ -104,21 +104,35 @@ async function convertAll() {
   zipWrap.classList.add('hidden');
   convertBtn.disabled = true;
   progressWrap.classList.remove('hidden');
-  setProgress(0, uploadedFiles.length);
+  progressText.textContent = 'Conversion en cours…';
+  progressBar.style.width = '0%';
 
-  for (let i = 0; i < uploadedFiles.length; i++) {
-    try {
-      const result = await convertSingle(uploadedFiles[i], quality);
-      convertedResults.push(result);
-      renderResult(result);
-      setProgress(i + 1, uploadedFiles.length);
-    } catch (err) {
-      console.error('Erreur pour', uploadedFiles[i].name, err);
-    }
+  // Barre de progression animée pendant l'attente
+  let pct = 0;
+  const timer = setInterval(() => {
+    pct = Math.min(pct + 1.5, 90);
+    progressBar.style.width = pct + '%';
+  }, 80);
+
+  try {
+    // Un seul POST avec tous les fichiers — le serveur les convertit en parallèle
+    const fd = new FormData();
+    uploadedFiles.forEach((f) => fd.append('files', f));
+    fd.append('quality', quality);
+
+    const res = await fetch('/api/convert', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    convertedResults = await res.json();
+  } catch (err) {
+    console.error('Erreur conversion', err);
   }
 
-  progressWrap.classList.add('hidden');
+  clearInterval(timer);
+  progressBar.style.width = '100%';
+  setTimeout(() => progressWrap.classList.add('hidden'), 200);
+
   convertBtn.disabled = false;
+  convertedResults.forEach((r) => renderResult(r));
 
   if (convertedResults.length) {
     renderStats();
@@ -131,15 +145,6 @@ async function convertAll() {
     );
     scheduleTpPopup(totalGain);
   }
-}
-
-async function convertSingle(file, quality) {
-  const fd = new FormData();
-  fd.append('files', file);
-  fd.append('quality', quality);
-  const res = await fetch('/api/convert', { method: 'POST', body: fd });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return (await res.json())[0];
 }
 
 // ── Progress ───────────────────────────────────────────────────────────────────
