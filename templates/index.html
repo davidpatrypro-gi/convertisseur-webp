@@ -395,14 +395,20 @@
     <div class="screenshots-row">
       <figure class="screenshot-figure">
         <img src="/static/screenshot-outil-upload.png"
+             srcset="/static/screenshot-outil-upload-sm.png 410w,
+                     /static/screenshot-outil-upload.png    820w"
+             sizes="(max-width: 900px) calc(100vw - 3rem), 570px"
              alt="Interface de conversion d'images JPG PNG en WebP gratuit"
-             width="820" height="400" loading="lazy">
+             width="820" height="400" loading="lazy" decoding="async">
         <figcaption class="screenshot-caption">Zone d'upload — glissez-déposez vos fichiers JPG et PNG</figcaption>
       </figure>
       <figure class="screenshot-figure">
         <img src="/static/screenshot-resultats.png"
+             srcset="/static/screenshot-resultats-sm.png 410w,
+                     /static/screenshot-resultats.png    820w"
+             sizes="(max-width: 900px) calc(100vw - 3rem), 570px"
              alt="Résultats de compression WebP : 22MB réduits à 4MB soit -81%"
-             width="820" height="420" loading="lazy">
+             width="820" height="420" loading="lazy" decoding="async">
         <figcaption class="screenshot-caption">Résultats de compression — aperçu avant/après et téléchargement ZIP</figcaption>
       </figure>
     </div>
@@ -487,5 +493,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/script.js"></script>
+<script src="/static/script.js" defer></script>
 {% endblock %}

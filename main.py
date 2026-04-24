@@ -7,6 +7,7 @@ from datetime import date
 from typing import AsyncGenerator, List
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -14,10 +15,32 @@ from PIL import Image
 
 app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.add_middleware(GZipMiddleware, minimum_size=1000)  # compresse HTML/JSON/CSS/JS > 1 Ko
 templates = Jinja2Templates(directory="templates")
 
 
-# ── Redirections ───────────────────────────────────────────────────────────────
+# ── Middlewares ────────────────────────────────────────────────────────────────
+
+@app.middleware("http")
+async def add_performance_headers(request: Request, call_next):
+    """Cache-Control long sur les assets statiques + en-têtes de sécurité."""
+    response = await call_next(request)
+    path = request.url.path
+    ct = response.headers.get("content-type", "")
+
+    if path.startswith("/static/"):
+        # Assets versionnés : cache 1 an, immuable
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif "text/html" in ct:
+        # Pages HTML : jamais en cache (contenu dynamique)
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+
+    # En-têtes de sécurité sur toutes les réponses
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"]        = "SAMEORIGIN"
+    response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
+    return response
+
 
 @app.middleware("http")
 async def redirect_www(request: Request, call_next):
