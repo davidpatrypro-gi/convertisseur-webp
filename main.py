@@ -33,7 +33,7 @@ def _to_webp(content: bytes, quality: int) -> bytes:
     else:
         img = img.convert("RGB")
     buf = io.BytesIO()
-    img.save(buf, format="WebP", quality=quality, method=6, optimize=True)
+    img.save(buf, format="WebP", quality=quality)
     return buf.getvalue()
 
 
