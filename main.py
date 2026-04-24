@@ -60,6 +60,11 @@ async def _zip_stream(entries: List[tuple]) -> AsyncGenerator[bytes, None]:
 
 # ── Pages ──────────────────────────────────────────────────────────────────────
 
+@app.head("/")
+async def head_root():
+    return Response(status_code=200)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
