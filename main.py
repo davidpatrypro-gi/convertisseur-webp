@@ -7,7 +7,7 @@ from datetime import date
 from typing import AsyncGenerator, List
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, Response, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image
@@ -15,6 +15,18 @@ from PIL import Image
 app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+
+# ── Redirections ───────────────────────────────────────────────────────────────
+
+@app.middleware("http")
+async def redirect_www(request: Request, call_next):
+    """Redirige www.convertwebp.fr → convertwebp.fr (301)."""
+    host = request.headers.get("host", "")
+    if host.startswith("www."):
+        url = str(request.url).replace("://www.", "://", 1)
+        return RedirectResponse(url=url, status_code=301)
+    return await call_next(request)
 
 # Thread pool dédié aux conversions CPU-bound
 _executor = ThreadPoolExecutor()

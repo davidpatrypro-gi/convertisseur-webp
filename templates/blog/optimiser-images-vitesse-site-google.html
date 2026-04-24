@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}5 techniques pour optimiser vos images et booster la vitesse de votre site{% endblock %}
+{% block title %}5 techniques pour optimiser vos images et votre PageSpeed{% endblock %}
 {% block description %}WebP, lazy loading, srcset, compression intelligente : guide complet pour optimiser vos images et booster votre score Google PageSpeed.{% endblock %}
 {% block canonical %}https://convertwebp.fr/blog/optimiser-images-vitesse-site-google{% endblock %}
 {% block og_url %}https://convertwebp.fr/blog/optimiser-images-vitesse-site-google{% endblock %}
-{% block og_title %}5 techniques pour optimiser vos images et booster la vitesse de votre site{% endblock %}
+{% block og_title %}5 techniques pour optimiser vos images et votre PageSpeed{% endblock %}
 {% block og_description %}Guide complet : WebP, lazy loading, srcset, compression et redimensionnement pour améliorer votre score PageSpeed Google.{% endblock %}
 
 {% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil",     "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog",        "item": "https://convertwebp.fr/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Optimiser vos images", "item": "https://convertwebp.fr/blog/optimiser-images-vitesse-site-google" }
+  ]
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -15,11 +26,21 @@
   "headline": "5 techniques pour optimiser vos images et booster la vitesse de votre site",
   "description": "Guide complet des meilleures techniques d'optimisation d'images : WebP, lazy loading, srcset, compression et redimensionnement.",
   "url": "https://convertwebp.fr/blog/optimiser-images-vitesse-site-google",
+  "image": "https://convertwebp.fr/static/brand/banniere-gmb-1332x750.png",
   "datePublished": "2024-01-25",
-  "dateModified": "2024-01-25",
+  "dateModified": "2026-04-24",
   "inLanguage": "fr",
-  "author": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
-  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" }
+  "author": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr",
+    "logo": { "@type": "ImageObject", "url": "https://convertwebp.fr/static/favicon-180x180.png" }
+  }
 }
 </script>
 {% endblock %}

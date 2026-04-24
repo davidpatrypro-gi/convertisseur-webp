@@ -14,13 +14,26 @@
   <meta property="og:title"       content="{% block og_title %}Convertir JPG PNG en WebP gratuitement | ConvertWebP{% endblock %}">
   <meta property="og:description" content="{% block og_description %}Convertissez vos images JPG et PNG au format WebP gratuitement. Réduisez le poids de vos images jusqu'à 90%.{% endblock %}">
   <meta property="og:url"         content="{% block og_url %}https://convertwebp.fr/{% endblock %}">
+  <meta property="og:image"       content="{% block og_image %}https://convertwebp.fr/static/brand/banniere-gmb-1332x750.png{% endblock %}">
+  <meta property="og:image:width"  content="1332">
+  <meta property="og:image:height" content="750">
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="{% block tw_title %}Convertir JPG PNG en WebP | ConvertWebP{% endblock %}">
   <meta name="twitter:description" content="{% block tw_description %}Convertissez vos images gratuitement en WebP et gagnez jusqu'à 90% de poids.{% endblock %}">
+  <meta name="twitter:image"       content="{% block tw_image %}https://convertwebp.fr/static/brand/banniere-gmb-1332x750.png{% endblock %}">
 
   <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr",
+    "logo": "https://convertwebp.fr/static/favicon-180x180.png"
+  }
+  </script>
   {% block json_ld %}
   <script type="application/ld+json">
   {
@@ -80,7 +93,9 @@
 </div>
 
 <!-- ── Content ─────────────────────────────────────────────────────────────── -->
+<main id="main-content">
 {% block content %}{% endblock %}
+</main>
 
 <!-- ── Footer ──────────────────────────────────────────────────────────────── -->
 <footer class="site-footer">

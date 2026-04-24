@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}WebP vs JPG vs PNG : quel format choisir pour vos images web ?{% endblock %}
-{% block description %}Comparaison complète des formats WebP, JPG et PNG : avantages, inconvénients, tableau comparatif et recommandations selon votre type d'image.{% endblock %}
+{% block title %}WebP vs JPG vs PNG : quel format choisir ? | ConvertWebP{% endblock %}
+{% block description %}Comparaison complète WebP, JPG et PNG : avantages, inconvénients, tableau comparatif et recommandations selon votre type d'image.{% endblock %}
 {% block canonical %}https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison{% endblock %}
 {% block og_url %}https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison{% endblock %}
-{% block og_title %}WebP vs JPG vs PNG : quel format choisir pour vos images web ?{% endblock %}
+{% block og_title %}WebP vs JPG vs PNG : quel format choisir ? | ConvertWebP{% endblock %}
 {% block og_description %}Analyse complète des trois formats d'image web : tableau comparatif et recommandations pratiques.{% endblock %}
 
 {% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog",    "item": "https://convertwebp.fr/blog" },
+    { "@type": "ListItem", "position": 3, "name": "WebP vs JPG vs PNG", "item": "https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison" }
+  ]
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -15,11 +26,21 @@
   "headline": "WebP vs JPG vs PNG : quel format choisir pour vos images web ?",
   "description": "Comparaison complète des formats WebP, JPG et PNG avec tableau comparatif et recommandations.",
   "url": "https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison",
+  "image": "https://convertwebp.fr/static/brand/banniere-gmb-1332x750.png",
   "datePublished": "2024-01-20",
-  "dateModified": "2024-01-20",
+  "dateModified": "2026-04-24",
   "inLanguage": "fr",
-  "author": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
-  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" }
+  "author": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr",
+    "logo": { "@type": "ImageObject", "url": "https://convertwebp.fr/static/favicon-180x180.png" }
+  }
 }
 </script>
 {% endblock %}

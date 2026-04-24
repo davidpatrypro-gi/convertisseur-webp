@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Pourquoi convertir vos images en WebP est essentiel pour le SEO{% endblock %}
-{% block description %}Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre classement Google. Chiffres, études et conseils d'intégration pratiques.{% endblock %}
+{% block title %}Convertir en WebP : essentiel pour votre SEO | ConvertWebP{% endblock %}
+{% block description %}Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre classement Google. Chiffres, études et conseils pratiques.{% endblock %}
 {% block canonical %}https://convertwebp.fr/blog/pourquoi-convertir-images-webp-seo{% endblock %}
 {% block og_url %}https://convertwebp.fr/blog/pourquoi-convertir-images-webp-seo{% endblock %}
-{% block og_title %}Pourquoi convertir vos images en WebP est essentiel pour le SEO{% endblock %}
+{% block og_title %}Convertir en WebP : essentiel pour votre SEO | ConvertWebP{% endblock %}
 {% block og_description %}Impact du WebP sur les Core Web Vitals, le LCP et le classement Google. Chiffres et conseils d'intégration.{% endblock %}
 
 {% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog",    "item": "https://convertwebp.fr/blog" },
+    { "@type": "ListItem", "position": 3, "name": "Convertir en WebP et SEO", "item": "https://convertwebp.fr/blog/pourquoi-convertir-images-webp-seo" }
+  ]
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -15,11 +26,21 @@
   "headline": "Pourquoi convertir vos images en WebP est essentiel pour votre SEO",
   "description": "Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre classement Google.",
   "url": "https://convertwebp.fr/blog/pourquoi-convertir-images-webp-seo",
+  "image": "https://convertwebp.fr/static/brand/banniere-gmb-1332x750.png",
   "datePublished": "2024-01-15",
-  "dateModified": "2024-01-15",
+  "dateModified": "2026-04-24",
   "inLanguage": "fr",
-  "author": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
-  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" }
+  "author": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ConvertWebP",
+    "url": "https://convertwebp.fr",
+    "logo": { "@type": "ImageObject", "url": "https://convertwebp.fr/static/favicon-180x180.png" }
+  }
 }
 </script>
 {% endblock %}

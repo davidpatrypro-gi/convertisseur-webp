@@ -5,6 +5,19 @@
 {% block canonical %}https://convertwebp.fr/blog{% endblock %}
 {% block og_url %}https://convertwebp.fr/blog{% endblock %}
 
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog",    "item": "https://convertwebp.fr/blog" }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <section class="blog-hero">
   <div class="container">
