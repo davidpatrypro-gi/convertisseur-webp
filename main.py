@@ -1,8 +1,10 @@
+import asyncio
 import base64
 import io
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
-from typing import List
+from typing import AsyncGenerator, List
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response, StreamingResponse
@@ -14,10 +16,14 @@ app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# Thread pool dédié aux conversions CPU-bound
+_executor = ThreadPoolExecutor()
 
-# ── Conversion helper ──────────────────────────────────────────────────────────
+
+# ── Conversion helpers ─────────────────────────────────────────────────────────
 
 def _to_webp(content: bytes, quality: int) -> bytes:
+    """Conversion synchrone — exécutée dans le thread pool."""
     img = Image.open(io.BytesIO(content))
     if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
         bg = Image.new("RGB", img.size, (255, 255, 255))
@@ -27,8 +33,29 @@ def _to_webp(content: bytes, quality: int) -> bytes:
     else:
         img = img.convert("RGB")
     buf = io.BytesIO()
-    img.save(buf, format="WebP", quality=quality)
+    img.save(buf, format="WebP", quality=quality, method=6, optimize=True)
     return buf.getvalue()
+
+
+async def _to_webp_async(content: bytes, quality: int) -> bytes:
+    """Lance _to_webp dans le thread pool sans bloquer la boucle asyncio."""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(_executor, _to_webp, content, quality)
+
+
+async def _zip_stream(entries: List[tuple]) -> AsyncGenerator[bytes, None]:
+    """Génère le ZIP en chunks de 64 Ko pour StreamingResponse."""
+    zip_buf = io.BytesIO()
+    with zipfile.ZipFile(
+        zip_buf, "w",
+        compression=zipfile.ZIP_DEFLATED,
+        compresslevel=1,
+    ) as zf:
+        for filename, data in entries:
+            zf.writestr(filename, data)
+    zip_buf.seek(0)
+    while chunk := zip_buf.read(65_536):
+        yield chunk
 
 
 # ── Pages ──────────────────────────────────────────────────────────────────────
@@ -75,21 +102,26 @@ async def api_convert(
     files: List[UploadFile] = File(...),
     quality: int = Form(80),
 ):
-    results = []
-    for file in files:
-        content = await file.read()
-        webp_bytes = _to_webp(content, quality)
-        stem = file.filename.rsplit(".", 1)[0]
-        results.append({
+    # Lecture I/O en parallèle
+    contents = await asyncio.gather(*[f.read() for f in files])
+
+    # Conversions CPU en parallèle dans le thread pool
+    webp_list = await asyncio.gather(
+        *[_to_webp_async(c, quality) for c in contents]
+    )
+
+    return [
+        {
             "original_name": file.filename,
-            "webp_name": f"{stem}.webp",
+            "webp_name": f"{file.filename.rsplit('.', 1)[0]}.webp",
             "original_size": len(content),
             "converted_size": len(webp_bytes),
             "original_b64": base64.b64encode(content).decode(),
             "original_mime": file.content_type or "image/jpeg",
             "webp_b64": base64.b64encode(webp_bytes).decode(),
-        })
-    return results
+        }
+        for file, content, webp_bytes in zip(files, contents, webp_list)
+    ]
 
 
 @app.post("/api/convert-zip")
@@ -97,18 +129,23 @@ async def api_convert_zip(
     files: List[UploadFile] = File(...),
     quality: int = Form(80),
 ):
-    zip_buf = io.BytesIO()
-    with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for file in files:
-            content = await file.read()
-            webp_bytes = _to_webp(content, quality)
-            stem = file.filename.rsplit(".", 1)[0]
-            zf.writestr(f"{stem}.webp", webp_bytes)
-    zip_buf.seek(0)
+    # Lecture I/O en parallèle
+    contents = await asyncio.gather(*[f.read() for f in files])
+
+    # Conversions CPU en parallèle dans le thread pool
+    webp_list = await asyncio.gather(
+        *[_to_webp_async(c, quality) for c in contents]
+    )
+
+    entries = [
+        (f"{f.filename.rsplit('.', 1)[0]}.webp", wb)
+        for f, wb in zip(files, webp_list)
+    ]
+
     return StreamingResponse(
-        zip_buf,
+        _zip_stream(entries),
         media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=images_webp.zip"},
+        headers={"Content-Disposition": 'attachment; filename="images_webp.zip"'},
     )
 
 
