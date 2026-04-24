@@ -43,6 +43,21 @@ async def add_performance_headers(request: Request, call_next):
 
 
 @app.middleware("http")
+async def normalize_url(request: Request, call_next):
+    """301 : URLs majuscules → minuscules, trailing slash (hors racine)."""
+    path = request.url.path
+    new_path = None
+    if path != "/" and path.endswith("/"):
+        new_path = path.rstrip("/")
+    elif path != path.lower():
+        new_path = path.lower()
+    if new_path:
+        url = str(request.url).replace(path, new_path, 1)
+        return RedirectResponse(url=url, status_code=301)
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def redirect_www(request: Request, call_next):
     """Redirige www.convertwebp.fr → convertwebp.fr (301)."""
     host = request.headers.get("host", "")
