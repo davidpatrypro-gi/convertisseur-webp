@@ -115,6 +115,16 @@ async def head_root():
     return Response(status_code=200)
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Sert le favicon à la racine (requis par Google Search et les navigateurs)."""
+    import os
+    favicon_path = os.path.join("static", "favicon.ico")
+    with open(favicon_path, "rb") as f:
+        content = f.read()
+    return Response(content=content, media_type="image/x-icon")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
