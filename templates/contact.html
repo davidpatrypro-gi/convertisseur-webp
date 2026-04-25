@@ -206,19 +206,21 @@
       body: JSON.stringify({ name, email, url, message })
     })
     .then(function (res) { return res.json(); })
-    .then(function (data) {
-      if (data.ok) {
-        form.style.display = 'none';
-        success.style.display = 'block';
-        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        showError("Une erreur est survenue lors de l'envoi. Réessayez ou écrivez-nous directement à contact@convertwebp.fr");
-        submit.disabled = false;
-        submit.textContent = 'Recevoir mon audit gratuit →';
-      }
+    .then(function (res) {
+      return res.json().then(function (data) {
+        if (data.ok) {
+          form.style.display = 'none';
+          success.style.display = 'block';
+          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          showError('Erreur serveur : ' + (data.error || 'inconnue') + ' — Écrivez-nous à contact@convertwebp.fr');
+          submit.disabled = false;
+          submit.textContent = 'Recevoir mon audit gratuit →';
+        }
+      });
     })
-    .catch(function () {
-      showError("Impossible de contacter le serveur. Écrivez-nous directement à contact@convertwebp.fr");
+    .catch(function (err) {
+      showError('Impossible de contacter le serveur (' + err + ') — Écrivez-nous à contact@convertwebp.fr');
       submit.disabled = false;
       submit.textContent = 'Recevoir mon audit gratuit →';
     });

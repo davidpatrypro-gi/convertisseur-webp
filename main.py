@@ -182,7 +182,6 @@ async def api_contact(form: ContactForm):
     - notification interne à contact@convertwebp.fr
     - confirmation automatique à l'expéditeur
     """
-    loop = asyncio.get_event_loop()
     message_block = (
         f"<p><strong>Objectifs SEO :</strong><br>{form.message.replace(chr(10), '<br>')}</p>"
         if form.message.strip() else ""
@@ -269,23 +268,49 @@ async def api_contact(form: ContactForm):
       </div>
     </div>"""
 
+    loop = asyncio.get_running_loop()
     try:
-        await loop.run_in_executor(_executor, lambda: resend.Emails.send({
+        r1 = await loop.run_in_executor(_executor, lambda: resend.Emails.send({
             "from":    FROM_EMAIL,
             "to":      [CONTACT_EMAIL],
             "subject": f"Nouvelle demande d'audit SEO — {form.url}",
             "html":    notif_html,
         }))
-        await loop.run_in_executor(_executor, lambda: resend.Emails.send({
+        print(f"[Resend] notif envoyée : {r1}")
+
+        r2 = await loop.run_in_executor(_executor, lambda: resend.Emails.send({
             "from":    FROM_EMAIL,
             "to":      [form.email],
             "subject": "Votre demande d'audit SEO a bien été reçue",
             "html":    confirm_html,
         }))
+        print(f"[Resend] confirmation envoyée : {r2}")
+
     except Exception as exc:
+        print(f"[Resend] ERREUR : {exc}")
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
     return JSONResponse({"ok": True})
+
+
+@app.get("/api/contact/test")
+async def api_contact_test():
+    """Route de diagnostic — envoie un email de test à contact@convertwebp.fr.
+    Accéder à https://convertwebp.fr/api/contact/test pour vérifier Resend."""
+    loop = asyncio.get_running_loop()
+    try:
+        r = await loop.run_in_executor(_executor, lambda: resend.Emails.send({
+            "from":    FROM_EMAIL,
+            "to":      [CONTACT_EMAIL],
+            "subject": "[TEST] Diagnostic Resend — ConvertWebP",
+            "html":    "<p>Si vous recevez cet email, Resend fonctionne correctement.</p>",
+        }))
+        print(f"[Resend TEST] résultat : {r}")
+        return JSONResponse({"ok": True, "resend_response": str(r)})
+    except Exception as exc:
+        print(f"[Resend TEST] ERREUR : {exc}")
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
+
 
 @app.get("/contact", response_class=HTMLResponse)
 async def contact(request: Request):
