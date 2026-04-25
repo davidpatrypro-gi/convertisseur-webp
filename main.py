@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 # ── Resend ─────────────────────────────────────────────────────────────────────
 resend.api_key = "re_JFetnr12_M4ftDxDgBGGpAcbauBzTFLPy"
-CONTACT_EMAIL  = "contact@convertwebp.fr"
+CONTACT_EMAIL  = "david.patrypro@gmail.com"
 FROM_EMAIL     = "ConvertWebP <contact@convertwebp.fr>"
 
 
