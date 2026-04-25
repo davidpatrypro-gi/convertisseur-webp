@@ -162,10 +162,15 @@ async def blog_optimiser(request: Request):
 
 # ── API ────────────────────────────────────────────────────────────────────────
 
+@app.get("/contact", response_class=HTMLResponse)
+async def contact(request: Request):
+    return templates.TemplateResponse(request, "contact.html")
+
+
 @app.post("/api/convert")
 async def api_convert(
     files: List[UploadFile] = File(...),
-    quality: int = Form(80),
+    quality: int = Form(60),
 ):
     # Lecture I/O en parallèle
     contents = await asyncio.gather(*[f.read() for f in files])
@@ -192,7 +197,7 @@ async def api_convert(
 @app.post("/api/convert-zip")
 async def api_convert_zip(
     files: List[UploadFile] = File(...),
-    quality: int = Form(80),
+    quality: int = Form(60),
 ):
     # Lecture I/O en parallèle
     contents = await asyncio.gather(*[f.read() for f in files])

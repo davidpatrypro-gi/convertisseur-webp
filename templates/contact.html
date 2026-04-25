@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Audit SEO Gratuit — Analyse de votre site web | ConvertWebP{% endblock %}
+{% block description %}Demandez votre audit SEO gratuit. Notre équipe analyse votre site et vous envoie un rapport personnalisé sous 48h : Core Web Vitals, images, performance.{% endblock %}
+{% block canonical %}https://convertwebp.fr/contact{% endblock %}
+{% block og_url %}https://convertwebp.fr/contact{% endblock %}
+{% block og_title %}Audit SEO Gratuit — Analyse de votre site web | ConvertWebP{% endblock %}
+{% block og_description %}Recevez une analyse SEO gratuite et personnalisée de votre site sous 48h : Core Web Vitals, images, performance Google.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Audit SEO Gratuit", "item": "https://convertwebp.fr/contact" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Audit SEO Gratuit",
+  "url": "https://convertwebp.fr/contact",
+  "description": "Demandez une analyse SEO gratuite et personnalisée de votre site web."
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero contact ─────────────────────────────────────────────────────────── -->
+<section class="hero" style="padding: 3.5rem 0 2.5rem;">
+  <div class="container" style="text-align:center;">
+    <nav class="breadcrumb" style="justify-content:center; margin-bottom:1.5rem;">
+      <a href="/" style="color:rgba(255,255,255,.8);">Accueil</a><span style="color:rgba(255,255,255,.5); margin:0 .4rem;">›</span>
+      <span style="color:white;">Audit SEO Gratuit</span>
+    </nav>
+    <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); line-height:1.25;">Demandez votre Audit SEO Gratuit</h1>
+    <p style="font-size:1.15rem; color:rgba(255,255,255,.88); max-width:560px; margin:1rem auto 0;">
+      Notre équipe analyse gratuitement votre site et vous envoie un rapport SEO personnalisé sous 48h
+    </p>
+  </div>
+</section>
+
+<!-- ── Badges de réassurance ─────────────────────────────────────────────────── -->
+<section style="background:#f8f7ff; border-bottom:1px solid #e8e4ff; padding:1.25rem 0;">
+  <div class="container">
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem;">
+      <span style="display:flex; align-items:center; gap:.4rem; font-size:.95rem; color:#4F46E5; font-weight:600;">✅ 100% gratuit</span>
+      <span style="display:flex; align-items:center; gap:.4rem; font-size:.95rem; color:#4F46E5; font-weight:600;">⚡ Réponse sous 48h</span>
+      <span style="display:flex; align-items:center; gap:.4rem; font-size:.95rem; color:#4F46E5; font-weight:600;">🔍 Analyse personnalisée</span>
+      <span style="display:flex; align-items:center; gap:.4rem; font-size:.95rem; color:#4F46E5; font-weight:600;">📊 Rapport détaillé</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Corps principal ─────────────────────────────────────────────────────── -->
+<section style="padding: 3rem 0 4rem;">
+  <div class="container">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; max-width:1000px; margin:0 auto;">
+
+      <!-- Formulaire -->
+      <div>
+        <h2 style="font-size:1.4rem; margin-bottom:.5rem; color:#1a1a2e;">Remplissez le formulaire</h2>
+        <p style="color:#555; margin-bottom:1.75rem; font-size:.95rem;">Nous vous envoyons votre rapport par email dans les 48h suivant votre demande.</p>
+
+        <!-- Message de confirmation (caché par défaut) -->
+        <div id="contact-success"
+             style="display:none; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:1.5rem; text-align:center; margin-bottom:1.5rem;">
+          <div style="font-size:2.5rem; margin-bottom:.75rem;">✅</div>
+          <h3 style="color:#166534; margin-bottom:.5rem;">Demande envoyée !</h3>
+          <p style="color:#166534; margin:0; font-size:.95rem;">Merci ! Notre équipe analyse votre site et vous répond sous 48h.</p>
+        </div>
+
+        <form id="contact-form" novalidate>
+          <!-- Prénom / Nom -->
+          <div style="margin-bottom:1.25rem;">
+            <label for="contact-name" style="display:block; font-weight:600; margin-bottom:.4rem; font-size:.9rem; color:#333;">
+              Prénom &amp; Nom <span style="color:#e53e3e;">*</span>
+            </label>
+            <input type="text" id="contact-name" name="name" required
+                   placeholder="Ex : Marie Dupont"
+                   style="width:100%; padding:.7rem 1rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:.95rem; outline:none; box-sizing:border-box; transition:border-color .2s;"
+                   onfocus="this.style.borderColor='#6c63ff'" onblur="this.style.borderColor='#d1d5db'">
+          </div>
+
+          <!-- Email -->
+          <div style="margin-bottom:1.25rem;">
+            <label for="contact-email" style="display:block; font-weight:600; margin-bottom:.4rem; font-size:.9rem; color:#333;">
+              Email professionnel <span style="color:#e53e3e;">*</span>
+            </label>
+            <input type="email" id="contact-email" name="email" required
+                   placeholder="vous@votreentreprise.com"
+                   style="width:100%; padding:.7rem 1rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:.95rem; outline:none; box-sizing:border-box; transition:border-color .2s;"
+                   onfocus="this.style.borderColor='#6c63ff'" onblur="this.style.borderColor='#d1d5db'">
+          </div>
+
+          <!-- URL -->
+          <div style="margin-bottom:1.25rem;">
+            <label for="contact-url" style="display:block; font-weight:600; margin-bottom:.4rem; font-size:.9rem; color:#333;">
+              URL du site à auditer <span style="color:#e53e3e;">*</span>
+            </label>
+            <input type="url" id="contact-url" name="url" required
+                   placeholder="https://votresite.com"
+                   style="width:100%; padding:.7rem 1rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:.95rem; outline:none; box-sizing:border-box; transition:border-color .2s;"
+                   onfocus="this.style.borderColor='#6c63ff'" onblur="this.style.borderColor='#d1d5db'">
+          </div>
+
+          <!-- Message -->
+          <div style="margin-bottom:1.75rem;">
+            <label for="contact-message" style="display:block; font-weight:600; margin-bottom:.4rem; font-size:.9rem; color:#333;">
+              Quels sont vos objectifs SEO ? <span style="color:#888; font-weight:400;">(optionnel)</span>
+            </label>
+            <textarea id="contact-message" name="message" rows="4"
+                      placeholder="Ex : améliorer mon score PageSpeed, corriger mes Core Web Vitals, optimiser les images de ma boutique Shopify…"
+                      style="width:100%; padding:.7rem 1rem; border:1.5px solid #d1d5db; border-radius:8px; font-size:.95rem; outline:none; resize:vertical; box-sizing:border-box; font-family:inherit; transition:border-color .2s;"
+                      onfocus="this.style.borderColor='#6c63ff'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+          </div>
+
+          <!-- Erreur -->
+          <div id="contact-error"
+               style="display:none; background:#fff5f5; border:1px solid #feb2b2; border-radius:8px; padding:.75rem 1rem; margin-bottom:1rem; color:#c53030; font-size:.9rem;">
+          </div>
+
+          <button type="submit" id="contact-submit"
+                  class="btn btn-primary"
+                  style="width:100%; padding:.85rem; font-size:1rem; font-weight:700; border:none; cursor:pointer;">
+            Recevoir mon audit gratuit →
+          </button>
+        </form>
+      </div>
+
+      <!-- Colonne info -->
+      <div>
+        <div style="background:#f8f7ff; border-radius:12px; padding:2rem; margin-bottom:1.5rem;">
+          <h3 style="font-size:1.1rem; color:#4F46E5; margin-bottom:1rem;">📋 Ce que vous recevrez</h3>
+          <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.75rem;">
+            <li style="display:flex; align-items:flex-start; gap:.6rem; font-size:.93rem; color:#333;">
+              <span style="color:#6c63ff; font-weight:700; flex-shrink:0;">✓</span>
+              <span><strong>Score PageSpeed</strong> mobile et desktop commenté</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:.6rem; font-size:.93rem; color:#333;">
+              <span style="color:#6c63ff; font-weight:700; flex-shrink:0;">✓</span>
+              <span><strong>Analyse des Core Web Vitals</strong> (LCP, INP, CLS)</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:.6rem; font-size:.93rem; color:#333;">
+              <span style="color:#6c63ff; font-weight:700; flex-shrink:0;">✓</span>
+              <span><strong>Audit des images</strong> : formats, poids, compression</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:.6rem; font-size:.93rem; color:#333;">
+              <span style="color:#6c63ff; font-weight:700; flex-shrink:0;">✓</span>
+              <span><strong>Liste des priorités</strong> : actions à fort impact</span>
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:.6rem; font-size:.93rem; color:#333;">
+              <span style="color:#6c63ff; font-weight:700; flex-shrink:0;">✓</span>
+              <span><strong>Recommandations personnalisées</strong> selon votre CMS</span>
+            </li>
+          </ul>
+        </div>
+
+        <div style="background:#fff; border:1.5px solid #e8e4ff; border-radius:12px; padding:1.5rem;">
+          <h3 style="font-size:1rem; color:#333; margin-bottom:.75rem;">💡 Commencez maintenant</h3>
+          <p style="font-size:.9rem; color:#555; margin-bottom:1rem;">Pendant l'attente de votre audit, optimisez déjà vos images avec notre outil gratuit :</p>
+          <a href="/" class="btn btn-primary" style="display:block; text-align:center; padding:.65rem;">
+            ⚡ Convertir mes images en WebP
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const form    = document.getElementById('contact-form');
+  const success = document.getElementById('contact-success');
+  const error   = document.getElementById('contact-error');
+  const submit  = document.getElementById('contact-submit');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    error.style.display = 'none';
+
+    const name    = document.getElementById('contact-name').value.trim();
+    const email   = document.getElementById('contact-email').value.trim();
+    const url     = document.getElementById('contact-url').value.trim();
+    const message = document.getElementById('contact-message').value.trim();
+
+    // Validation basique
+    if (!name) { showError('Veuillez entrer votre prénom et nom.'); return; }
+    if (!email || !email.includes('@')) { showError('Veuillez entrer une adresse email valide.'); return; }
+    if (!url) { showError("Veuillez entrer l'URL de votre site."); return; }
+
+    // Construction du lien mailto
+    const subject = encodeURIComponent('Demande d\'audit SEO gratuit — ' + url);
+    const body    = encodeURIComponent(
+      'Bonjour,\n\nJe souhaite recevoir un audit SEO gratuit pour mon site.\n\n'
+      + 'Nom : ' + name + '\n'
+      + 'Site : ' + url + '\n'
+      + (message ? 'Objectifs SEO : ' + message + '\n' : '')
+      + '\nCordialement,\n' + name
+    );
+
+    // Afficher la confirmation avant d'ouvrir le client mail
+    form.style.display = 'none';
+    success.style.display = 'block';
+    success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Ouvrir le client mail après 400ms
+    setTimeout(function () {
+      window.location.href = 'mailto:contact@convertwebp.fr?subject=' + subject + '&body=' + body;
+    }, 400);
+  });
+
+  function showError(msg) {
+    error.textContent = msg;
+    error.style.display = 'block';
+    error.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+})();
+</script>
+
+{% endblock %}
