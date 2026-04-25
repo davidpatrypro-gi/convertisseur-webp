@@ -207,20 +207,25 @@
     })
     .then(function (res) { return res.json(); })
     .then(function (res) {
-      return res.json().then(function (data) {
-        if (data.ok) {
-          form.style.display = 'none';
-          success.style.display = 'block';
-          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          showError('Erreur serveur : ' + (data.error || 'inconnue') + ' — Écrivez-nous à contact@convertwebp.fr');
+      if (res.ok) {
+        // Succès : on affiche la confirmation sans tenter de parser le JSON
+        form.style.display = 'none';
+        success.style.display = 'block';
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        // Erreur serveur : on lit le texte brut pour afficher le détail
+        return res.text().then(function (txt) {
+          var msg = 'inconnue';
+          try { msg = JSON.parse(txt).error || msg; } catch (e) { msg = txt.slice(0, 120); }
+          showError('Erreur serveur : ' + msg + ' — Écrivez-nous à contact@convertwebp.fr');
           submit.disabled = false;
           submit.textContent = 'Recevoir mon audit gratuit →';
-        }
-      });
+        });
+      }
     })
-    .catch(function (err) {
-      showError('Impossible de contacter le serveur (' + err + ') — Écrivez-nous à contact@convertwebp.fr');
+    .catch(function () {
+      // Erreur réseau pure (pas de réponse du tout)
+      showError('Impossible de joindre le serveur. Écrivez-nous directement à contact@convertwebp.fr');
       submit.disabled = false;
       submit.textContent = 'Recevoir mon audit gratuit →';
     });
