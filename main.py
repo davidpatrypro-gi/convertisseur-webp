@@ -6,12 +6,26 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from typing import AsyncGenerator, List
 
+import resend
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image
+from pydantic import BaseModel
+
+# ── Resend ─────────────────────────────────────────────────────────────────────
+resend.api_key = "re_JFetnr12_M4ftDxDgBGGpAcbauBzTFLPy"
+CONTACT_EMAIL  = "contact@convertwebp.fr"
+FROM_EMAIL     = "ConvertWebP <contact@convertwebp.fr>"
+
+
+class ContactForm(BaseModel):
+    name:    str
+    email:   str
+    url:     str
+    message: str = ""
 
 app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -161,6 +175,117 @@ async def blog_optimiser(request: Request):
 
 
 # ── API ────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/contact")
+async def api_contact(form: ContactForm):
+    """Envoie deux emails via Resend :
+    - notification interne à contact@convertwebp.fr
+    - confirmation automatique à l'expéditeur
+    """
+    loop = asyncio.get_event_loop()
+    message_block = (
+        f"<p><strong>Objectifs SEO :</strong><br>{form.message.replace(chr(10), '<br>')}</p>"
+        if form.message.strip() else ""
+    )
+
+    # ── Email de notification (pour nous) ──────────────────────────────────────
+    notif_html = f"""
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+      <div style="background:#6c63ff;padding:16px 24px;border-radius:8px 8px 0 0;">
+        <h1 style="color:white;margin:0;font-size:1.25rem;">
+          🎯 Nouvelle demande d'audit SEO
+        </h1>
+      </div>
+      <div style="background:#f9f9ff;border:1px solid #e0dbff;border-top:none;
+                  border-radius:0 0 8px 8px;padding:24px;">
+        <table style="width:100%;border-collapse:collapse;font-size:.95rem;">
+          <tr>
+            <td style="padding:8px 0;color:#666;width:130px;">Nom</td>
+            <td style="padding:8px 0;font-weight:600;color:#1a1a2e;">{form.name}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#666;">Email</td>
+            <td style="padding:8px 0;">
+              <a href="mailto:{form.email}" style="color:#6c63ff;">{form.email}</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#666;">Site à auditer</td>
+            <td style="padding:8px 0;">
+              <a href="{form.url}" target="_blank" style="color:#6c63ff;">{form.url}</a>
+            </td>
+          </tr>
+        </table>
+        {message_block}
+        <div style="margin-top:20px;">
+          <a href="mailto:{form.email}?subject=Votre audit SEO ConvertWebP"
+             style="background:#6c63ff;color:white;padding:10px 20px;
+                    border-radius:6px;text-decoration:none;font-weight:600;">
+            Répondre à {form.name} →
+          </a>
+        </div>
+      </div>
+    </div>"""
+
+    # ── Email de confirmation (pour l'utilisateur) ─────────────────────────────
+    confirm_html = f"""
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+      <div style="background:#6c63ff;padding:20px 24px;border-radius:8px 8px 0 0;">
+        <h1 style="color:white;margin:0;font-size:1.3rem;">ConvertWebP</h1>
+      </div>
+      <div style="background:#ffffff;border:1px solid #e0dbff;border-top:none;
+                  border-radius:0 0 8px 8px;padding:28px;">
+        <h2 style="color:#1a1a2e;margin-top:0;">
+          Votre demande d'audit a bien été reçue ✅
+        </h2>
+        <p style="color:#444;">Bonjour {form.name},</p>
+        <p style="color:#444;">
+          Nous avons bien reçu votre demande d'audit SEO pour
+          <strong>{form.url}</strong>.
+        </p>
+        <div style="background:#f0eeff;border-left:4px solid #6c63ff;
+                    border-radius:4px;padding:14px 18px;margin:20px 0;">
+          <p style="margin:0;color:#333;font-size:.95rem;">
+            Notre équipe analyse votre site et vous envoie un rapport personnalisé
+            <strong>dans les 48 heures</strong> à cette adresse email.
+          </p>
+        </div>
+        <p style="color:#444;">
+          En attendant, si vous ne l'avez pas encore fait, vous pouvez
+          commencer à optimiser vos images avec notre outil gratuit :
+        </p>
+        <p style="text-align:center;margin:24px 0;">
+          <a href="https://convertwebp.fr"
+             style="background:#6c63ff;color:white;padding:12px 24px;
+                    border-radius:6px;text-decoration:none;font-weight:700;">
+            ⚡ Convertir mes images en WebP
+          </a>
+        </p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+        <p style="color:#999;font-size:.85rem;margin:0;">
+          ConvertWebP · <a href="https://convertwebp.fr" style="color:#6c63ff;">convertwebp.fr</a>
+          · Vous recevez cet email car vous avez rempli notre formulaire d'audit SEO.
+        </p>
+      </div>
+    </div>"""
+
+    try:
+        await loop.run_in_executor(_executor, lambda: resend.Emails.send({
+            "from":    FROM_EMAIL,
+            "to":      [CONTACT_EMAIL],
+            "subject": f"Nouvelle demande d'audit SEO — {form.url}",
+            "html":    notif_html,
+        }))
+        await loop.run_in_executor(_executor, lambda: resend.Emails.send({
+            "from":    FROM_EMAIL,
+            "to":      [form.email],
+            "subject": "Votre demande d'audit SEO a bien été reçue",
+            "html":    confirm_html,
+        }))
+    except Exception as exc:
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
+
+    return JSONResponse({"ok": True})
 
 @app.get("/contact", response_class=HTMLResponse)
 async def contact(request: Request):

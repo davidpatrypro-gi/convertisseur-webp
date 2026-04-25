@@ -195,25 +195,33 @@
     if (!email || !email.includes('@')) { showError('Veuillez entrer une adresse email valide.'); return; }
     if (!url) { showError("Veuillez entrer l'URL de votre site."); return; }
 
-    // Construction du lien mailto
-    const subject = encodeURIComponent('Demande d\'audit SEO gratuit — ' + url);
-    const body    = encodeURIComponent(
-      'Bonjour,\n\nJe souhaite recevoir un audit SEO gratuit pour mon site.\n\n'
-      + 'Nom : ' + name + '\n'
-      + 'Site : ' + url + '\n'
-      + (message ? 'Objectifs SEO : ' + message + '\n' : '')
-      + '\nCordialement,\n' + name
-    );
+    // Désactiver le bouton pendant l'envoi
+    submit.disabled = true;
+    submit.textContent = 'Envoi en cours…';
 
-    // Afficher la confirmation avant d'ouvrir le client mail
-    form.style.display = 'none';
-    success.style.display = 'block';
-    success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // Ouvrir le client mail après 400ms
-    setTimeout(function () {
-      window.location.href = 'mailto:contact@convertwebp.fr?subject=' + subject + '&body=' + body;
-    }, 400);
+    // Envoi AJAX vers l'API
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, url, message })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.ok) {
+        form.style.display = 'none';
+        success.style.display = 'block';
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        showError("Une erreur est survenue lors de l'envoi. Réessayez ou écrivez-nous directement à contact@convertwebp.fr");
+        submit.disabled = false;
+        submit.textContent = 'Recevoir mon audit gratuit →';
+      }
+    })
+    .catch(function () {
+      showError("Impossible de contacter le serveur. Écrivez-nous directement à contact@convertwebp.fr");
+      submit.disabled = false;
+      submit.textContent = 'Recevoir mon audit gratuit →';
+    });
   });
 
   function showError(msg) {
