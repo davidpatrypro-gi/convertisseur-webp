@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Page introuvable (404) | ConvertWebP{% endblock %}
+{% block description %}La page que vous recherchez n'existe pas ou a été déplacée.{% endblock %}
+{% block canonical %}https://convertwebp.fr/{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
+
+{% block content %}
+<section style="min-height:60vh; display:flex; align-items:center; justify-content:center; padding:4rem 1.5rem;">
+  <div style="text-align:center; max-width:520px;">
+
+    <div style="font-size:6rem; line-height:1; margin-bottom:1.5rem;">🔍</div>
+
+    <h1 style="font-size:clamp(1.6rem,4vw,2.4rem); color:#1a1a2e; margin-bottom:1rem;">
+      Page introuvable
+    </h1>
+
+    <p style="color:#555; font-size:1.05rem; margin-bottom:2rem; line-height:1.6;">
+      La page que vous recherchez n'existe pas ou a été déplacée.<br>
+      Pas de panique, vous êtes au bon endroit pour optimiser vos images.
+    </p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-bottom:2.5rem;">
+      <a href="/" class="btn btn-primary" style="padding:.75rem 1.5rem;">
+        ⚡ Retour à l'outil
+      </a>
+      <a href="/blog" class="btn" style="padding:.75rem 1.5rem; background:#f0eeff; color:#6c63ff; font-weight:600;">
+        📚 Voir le blog SEO
+      </a>
+    </div>
+
+    <p style="color:#aaa; font-size:.85rem;">
+      Erreur 404 · <a href="/" style="color:#6c63ff;">convertwebp.fr</a>
+    </p>
+
+  </div>
+</section>
+{% endblock %}

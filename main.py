@@ -8,6 +8,7 @@ from typing import AsyncGenerator, List
 
 import resend
 from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -29,8 +30,13 @@ class ContactForm(BaseModel):
 
 app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.add_middleware(GZipMiddleware, minimum_size=1000)  # compresse HTML/JSON/CSS/JS > 1 Ko
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 templates = Jinja2Templates(directory="templates")
+
+
+@app.exception_handler(404)
+async def custom_404(request: Request, exc: HTTPException):
+    return templates.TemplateResponse(request, "404.html", status_code=404)
 
 
 # ── Middlewares ────────────────────────────────────────────────────────────────
@@ -311,25 +317,6 @@ async def api_contact(form: ContactForm):
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
     return JSONResponse({"ok": True})
-
-
-@app.get("/api/contact/test")
-async def api_contact_test():
-    """Route de diagnostic — envoie un email de test à contact@convertwebp.fr.
-    Accéder à https://convertwebp.fr/api/contact/test pour vérifier Resend."""
-    loop = asyncio.get_running_loop()
-    try:
-        r = await loop.run_in_executor(_executor, lambda: resend.Emails.send({
-            "from":    FROM_EMAIL,
-            "to":      [CONTACT_EMAIL],
-            "subject": "[TEST] Diagnostic Resend — ConvertWebP",
-            "html":    "<p>Si vous recevez cet email, Resend fonctionne correctement.</p>",
-        }))
-        print(f"[Resend TEST] résultat : {r}")
-        return JSONResponse({"ok": True, "resend_response": str(r)})
-    except Exception as exc:
-        print(f"[Resend TEST] ERREUR : {exc}")
-        return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
 
 @app.get("/contact", response_class=HTMLResponse)
