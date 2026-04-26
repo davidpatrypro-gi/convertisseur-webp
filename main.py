@@ -174,6 +174,26 @@ async def blog_optimiser(request: Request):
     return templates.TemplateResponse(request, "blog/optimiser-images-vitesse-site-google.html")
 
 
+@app.get("/sitemap.xml")
+async def sitemap():
+    content = open("static/sitemap.xml", "r", encoding="utf-8").read()
+    return Response(content=content, media_type="application/xml")
+
+
+@app.get("/robots.txt")
+async def robots():
+    content = open("static/robots.txt", "r", encoding="utf-8").read()
+    return Response(content=content, media_type="text/plain")
+
+
+@app.get("/blog/seo-local-2026-guide-complet", response_class=HTMLResponse)
+async def blog_seo_local(request: Request):
+    # Publication planifiée : visible à partir du 27 avril 2026
+    if date.today() < date(2026, 4, 27):
+        return Response(status_code=404)
+    return templates.TemplateResponse(request, "blog/seo-local-2026-guide-complet.html")
+
+
 # ── API ────────────────────────────────────────────────────────────────────────
 
 @app.post("/api/contact")
