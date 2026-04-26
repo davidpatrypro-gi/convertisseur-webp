@@ -3,7 +3,7 @@ import base64
 import io
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
 from typing import AsyncGenerator, List
 
 import resend
@@ -192,10 +192,13 @@ async def robots():
     return Response(content=content, media_type="text/plain")
 
 
+_PARIS = timezone(timedelta(hours=2))  # CEST avril 2026 = UTC+2
+_PUBLISH_SEO_LOCAL = datetime(2026, 4, 27, 9, 0, 0, tzinfo=_PARIS)
+
 @app.get("/blog/seo-local-2026-guide-complet", response_class=HTMLResponse)
 async def blog_seo_local(request: Request):
-    # Publication planifiée : visible à partir du 27 avril 2026
-    if date.today() < date(2026, 4, 27):
+    # Publication planifiée : visible le 27 avril 2026 à 09h00 (heure de Paris)
+    if datetime.now(tz=timezone.utc) < _PUBLISH_SEO_LOCAL:
         return Response(status_code=404)
     return templates.TemplateResponse(request, "blog/seo-local-2026-guide-complet.html")
 
