@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Stats — ConvertWebP</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: #f5f4ff; color: #1a1a2e; min-height: 100vh; }
+
+    /* Header */
+    .s-header {
+      background: #6c63ff; color: #fff;
+      padding: 1.1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .s-header h1 { font-size: 1.15rem; font-weight: 700; }
+    .s-header span { font-size: .85rem; opacity: .75; }
+
+    .s-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* Metric cards */
+    .s-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .s-card {
+      background: #fff; border-radius: 12px;
+      padding: 1.4rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(108,99,255,.08);
+      border-top: 3px solid #6c63ff;
+    }
+    .s-card.today { border-top-color: #22c55e; }
+    .s-card-label { font-size: .78rem; text-transform: uppercase;
+                    letter-spacing: .05em; color: #888; margin-bottom: .5rem; }
+    .s-card-value { font-size: 2rem; font-weight: 800; color: #4F46E5; line-height: 1; }
+    .s-card.today .s-card-value { color: #16a34a; }
+    .s-card-sub   { font-size: .78rem; color: #aaa; margin-top: .3rem; }
+
+    /* Section */
+    .s-section { background: #fff; border-radius: 12px;
+                 padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
+                 box-shadow: 0 2px 8px rgba(108,99,255,.06); }
+    .s-section h2 { font-size: 1rem; font-weight: 700;
+                    color: #4F46E5; margin-bottom: 1.25rem; }
+
+    /* Bar chart */
+    .chart {
+      display: flex; align-items: flex-end; gap: 6px;
+      height: 120px; padding-bottom: 24px; position: relative;
+    }
+    .chart-col { display: flex; flex-direction: column;
+                 align-items: center; flex: 1; min-width: 0; }
+    .chart-bar {
+      width: 100%; background: #6c63ff; border-radius: 4px 4px 0 0;
+      transition: opacity .2s;
+    }
+    .chart-bar:hover { opacity: .75; }
+    .chart-label { font-size: .65rem; color: #aaa; margin-top: 4px;
+                   white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
+                   max-width: 100%; text-align: center; }
+    .chart-val { font-size: .7rem; color: #6c63ff; font-weight: 700;
+                 margin-bottom: 2px; }
+    .chart-empty { color: #bbb; font-size: .9rem; padding: 2rem 0; text-align: center; width: 100%; }
+
+    /* Table */
+    .s-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    .s-table th { text-align: left; font-size: .75rem; text-transform: uppercase;
+                  letter-spacing: .04em; color: #999; padding: .6rem .75rem;
+                  border-bottom: 2px solid #f0eeff; }
+    .s-table td { padding: .6rem .75rem; border-bottom: 1px solid #f5f4ff; color: #333; }
+    .s-table tr:last-child td { border-bottom: none; }
+    .s-table tr:hover td { background: #faf9ff; }
+    .gain-badge {
+      display: inline-block; padding: .15rem .5rem; border-radius: 20px;
+      font-size: .75rem; font-weight: 700;
+      background: #dcfce7; color: #16a34a;
+    }
+    .gain-badge.low { background: #fef9c3; color: #a16207; }
+
+    @media (max-width: 600px) {
+      .s-wrap { padding: 1rem 1rem 3rem; }
+      .s-card-value { font-size: 1.6rem; }
+      .s-table th:nth-child(n+4),
+      .s-table td:nth-child(n+4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="s-header">
+  <h1>📊 ConvertWebP — Tableau de bord</h1>
+  <span>Accès privé</span>
+</div>
+
+<div class="s-wrap">
+
+  <!-- Métriques globales -->
+  <div class="s-cards">
+    <div class="s-card">
+      <div class="s-card-label">Conversions totales</div>
+      <div class="s-card-value">{{ reqs }}</div>
+      <div class="s-card-sub">requêtes depuis le lancement</div>
+    </div>
+    <div class="s-card">
+      <div class="s-card-label">Fichiers traités</div>
+      <div class="s-card-value">{{ files }}</div>
+      <div class="s-card-sub">images converties en WebP</div>
+    </div>
+    <div class="s-card">
+      <div class="s-card-label">Poids économisé</div>
+      <div class="s-card-value">{{ saved }}</div>
+      <div class="s-card-sub">total toutes conversions</div>
+    </div>
+    <div class="s-card">
+      <div class="s-card-label">Gain moyen</div>
+      <div class="s-card-value">{{ avg_gain }}%</div>
+      <div class="s-card-sub">réduction de poids par requête</div>
+    </div>
+    <div class="s-card today">
+      <div class="s-card-label">Aujourd'hui</div>
+      <div class="s-card-value">{{ today_reqs }}</div>
+      <div class="s-card-sub">{{ today_files }} fichier{{ 's' if today_files != 1 }}</div>
+    </div>
+  </div>
+
+  <!-- Graphique 14 jours -->
+  <div class="s-section">
+    <h2>📅 Fichiers convertis — 14 derniers jours</h2>
+    {% if days %}
+    <div class="chart">
+      {% for d in days %}
+      <div class="chart-col">
+        <div class="chart-val">{{ d.files }}</div>
+        <div class="chart-bar" style="height:{{ bar(d.files) }}px;"
+             title="{{ d.day }} — {{ d.files }} fichiers, {{ d.reqs }} requête{{ 's' if d.reqs != 1 }}"></div>
+        <div class="chart-label">{{ d.day[5:] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="chart"><p class="chart-empty">Aucune donnée pour les 14 derniers jours.</p></div>
+    {% endif %}
+  </div>
+
+  <!-- Historique récent -->
+  <div class="s-section">
+    <h2>🕐 30 dernières conversions</h2>
+    {% if recent %}
+    <div style="overflow-x:auto;">
+      <table class="s-table">
+        <thead>
+          <tr>
+            <th>Date &amp; heure</th>
+            <th>Fichiers</th>
+            <th>Poids original</th>
+            <th>Poids WebP</th>
+            <th>Économie</th>
+            <th>Gain</th>
+            <th>Qualité</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent %}
+          <tr>
+            <td>{{ r.ts[:16].replace('T',' ') }}</td>
+            <td>{{ r.files_count }}</td>
+            <td>{{ fmt(r.original_bytes) }}</td>
+            <td>{{ fmt(r.converted_bytes) }}</td>
+            <td>{{ fmt(r.original_bytes - r.converted_bytes) }}</td>
+            <td>
+              <span class="gain-badge {% if r.gain_pct < 30 %}low{% endif %}">
+                −{{ r.gain_pct }}%
+              </span>
+            </td>
+            <td>{{ r.quality }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color:#bbb; text-align:center; padding:2rem;">Aucune conversion enregistrée pour l'instant.</p>
+    {% endif %}
+  </div>
+
+</div>
+</body>
+</html>
