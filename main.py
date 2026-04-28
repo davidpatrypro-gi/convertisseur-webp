@@ -144,9 +144,11 @@ def _to_webp(content: bytes, quality: int) -> bytes:
     """Conversion synchrone — exécutée dans le thread pool."""
     img = Image.open(io.BytesIO(content))
 
-    # Resize si > 2000px — BILINEAR : 3x plus rapide que LANCZOS, imperceptible en WebP
-    MAX_DIM = 2000
-    if img.width > MAX_DIM or img.height > MAX_DIM:
+    # Resize uniquement si le fichier dépasse 5 Mo ET que la résolution dépasse 4000px
+    # Garde les proportions, accélère drastiquement la conversion sans perte visible
+    MAX_BYTES = 5 * 1024 * 1024   # 5 Mo
+    MAX_DIM   = 4000
+    if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
         img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
     # Gestion de la transparence
