@@ -144,9 +144,9 @@ def _to_webp(content: bytes, quality: int) -> bytes:
     """Conversion synchrone — exécutée dans le thread pool."""
     img = Image.open(io.BytesIO(content))
 
-    # Redimensionnement automatique si > 4096 px (photos RAW / haute résolution)
-    # Évite les temps de traitement excessifs sur serveur CPU limité
-    MAX_DIM = 4096
+    # Redimensionnement automatique si > 2000 px (photos de téléphone, RAW…)
+    # Au-delà, le gain en qualité web est nul et le temps de traitement explose
+    MAX_DIM = 2000
     if img.width > MAX_DIM or img.height > MAX_DIM:
         img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
 
@@ -160,8 +160,8 @@ def _to_webp(content: bytes, quality: int) -> bytes:
         img = img.convert("RGB")
 
     buf = io.BytesIO()
-    # method=2 : 3-4x plus rapide que le défaut (4), différence de qualité invisible
-    img.save(buf, format="WebP", quality=quality, method=2)
+    # method=1 : encodage rapide, qualité identique à l'œil pour le web
+    img.save(buf, format="WebP", quality=quality, method=1)
     return buf.getvalue()
 
 

@@ -112,12 +112,12 @@ async function convertAll() {
 
   // Un POST par fichier, tous lancés en parallèle.
   // Chaque résultat s'affiche dès qu'il est prêt → pas d'attente de la dernière image.
-  // Message de patience si le serveur met du temps à répondre (cold start Render)
+  // Message de patience si la conversion dure un peu (image volumineuse)
   const wakeTimer = setTimeout(() => {
     if (done === 0) {
-      progressText.textContent = 'Démarrage du serveur… quelques secondes encore ⏳';
+      progressText.textContent = 'Conversion en cours, image volumineuse détectée… ⏳';
     }
-  }, 4000);
+  }, 8000);
 
   const tasks = uploadedFiles.map((file) => {
     const fd = new FormData();
