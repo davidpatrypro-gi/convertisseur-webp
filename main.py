@@ -127,8 +127,15 @@ async def redirect_www(request: Request, call_next):
         return RedirectResponse(url=url, status_code=301)
     return await call_next(request)
 
-# Thread pool dédié aux conversions CPU-bound
-_executor = ThreadPoolExecutor()
+# Thread pool dédié aux conversions CPU-bound (borné pour Render free tier)
+_executor = ThreadPoolExecutor(max_workers=4)
+
+# Favicon mis en cache en mémoire au démarrage
+_FAVICON: bytes = b""
+try:
+    _FAVICON = Path("static/favicon.ico").read_bytes()
+except FileNotFoundError:
+    pass
 
 
 # ── Conversion helpers ─────────────────────────────────────────────────────────
@@ -150,7 +157,7 @@ def _to_webp(content: bytes, quality: int) -> bytes:
 
 async def _to_webp_async(content: bytes, quality: int) -> bytes:
     """Lance _to_webp dans le thread pool sans bloquer la boucle asyncio."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     return await loop.run_in_executor(_executor, _to_webp, content, quality)
 
 
@@ -178,12 +185,14 @@ async def head_root():
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    """Sert le favicon à la racine (requis par Google Search et les navigateurs)."""
-    import os
-    favicon_path = os.path.join("static", "favicon.ico")
-    with open(favicon_path, "rb") as f:
-        content = f.read()
-    return Response(content=content, media_type="image/x-icon")
+    """Sert le favicon à la racine — mis en cache en mémoire au démarrage."""
+    if not _FAVICON:
+        raise HTTPException(status_code=404)
+    return Response(
+        content=_FAVICON,
+        media_type="image/x-icon",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -387,14 +396,13 @@ async def api_convert(
         _executor, _record, len(contents), total_orig, total_conv, quality
     )
 
+    # original_b64 supprimé : le navigateur a déjà le fichier, inutile de le renvoyer
     return [
         {
             "original_name": file.filename,
             "webp_name": f"{file.filename.rsplit('.', 1)[0]}.webp",
             "original_size": len(content),
             "converted_size": len(webp_bytes),
-            "original_b64": base64.b64encode(content).decode(),
-            "original_mime": file.content_type or "image/jpeg",
             "webp_b64": base64.b64encode(webp_bytes).decode(),
         }
         for file, content, webp_bytes in zip(files, contents, webp_list)

@@ -96,7 +96,7 @@ function renderFileList() {
 // ── Conversion ─────────────────────────────────────────────────────────────────
 async function convertAll() {
   if (!uploadedFiles.length) return;
-  const quality = +qualitySlider.value;
+  const quality  = +qualitySlider.value;
   convertedResults = [];
 
   resultsContainer.innerHTML = '';
@@ -104,42 +104,48 @@ async function convertAll() {
   zipWrap.classList.add('hidden');
   convertBtn.disabled = true;
   progressWrap.classList.remove('hidden');
-  progressText.textContent = 'Conversion en cours…';
   progressBar.style.width = '0%';
 
-  // Barre de progression animée pendant l'attente
-  let pct = 0;
-  const timer = setInterval(() => {
-    pct = Math.min(pct + 1.5, 90);
-    progressBar.style.width = pct + '%';
-  }, 80);
+  const total = uploadedFiles.length;
+  let done = 0;
+  progressText.textContent = `0 / ${total} image${total > 1 ? 's' : ''} convertie…`;
 
-  try {
-    // Un seul POST avec tous les fichiers — le serveur les convertit en parallèle
+  // Un POST par fichier, tous lancés en parallèle.
+  // Chaque résultat s'affiche dès qu'il est prêt → pas d'attente de la dernière image.
+  const tasks = uploadedFiles.map((file) => {
     const fd = new FormData();
-    uploadedFiles.forEach((f) => fd.append('files', f));
+    fd.append('files', file);
     fd.append('quality', quality);
 
-    const res = await fetch('/api/convert', { method: 'POST', body: fd });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    convertedResults = await res.json();
-  } catch (err) {
-    console.error('Erreur conversion', err);
-  }
+    return fetch('/api/convert', { method: 'POST', body: fd })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(([result]) => {
+        convertedResults.push(result);
+        renderResult(result, file);   // affichage immédiat, original depuis le navigateur
+      })
+      .catch((err) => console.error('Erreur conversion', file.name, err))
+      .finally(() => {
+        done++;
+        progressBar.style.width = Math.round((done / total) * 100) + '%';
+        progressText.textContent =
+          `${done} / ${total} image${total > 1 ? 's' : ''} convertie${done > 1 ? 's' : ''}…`;
+      });
+  });
 
-  clearInterval(timer);
+  await Promise.all(tasks);
+
   progressBar.style.width = '100%';
-  setTimeout(() => progressWrap.classList.add('hidden'), 200);
-
+  setTimeout(() => progressWrap.classList.add('hidden'), 300);
   convertBtn.disabled = false;
-  convertedResults.forEach((r) => renderResult(r));
 
   if (convertedResults.length) {
     renderStats();
     statsContainer.classList.remove('hidden');
-    zipWrap.classList.remove('hidden');
+    if (convertedResults.length > 1) zipWrap.classList.remove('hidden');
     statsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
     const totalGain = convertedResults.reduce(
       (s, r) => s + (r.original_size - r.converted_size), 0
     );
@@ -155,10 +161,20 @@ function setProgress(done, total) {
 }
 
 // ── Render results ─────────────────────────────────────────────────────────────
-function renderResult(r) {
-  const ratio   = ((1 - r.converted_size / r.original_size) * 100).toFixed(1);
-  const saving  = r.original_size - r.converted_size;
+function renderResult(r, originalFile) {
+  const ratio    = ((1 - r.converted_size / r.original_size) * 100).toFixed(1);
+  const saving   = r.original_size - r.converted_size;
   const positive = parseFloat(ratio) > 0;
+
+  // Aperçu "avant" : on utilise le fichier local, zéro octet supplémentaire transféré
+  const originalSrc = URL.createObjectURL(originalFile);
+
+  // Aperçu "après" : blob WebP depuis le base64 reçu
+  const webpBytes = atob(r.webp_b64);
+  const webpArr   = new Uint8Array(webpBytes.length);
+  for (let i = 0; i < webpBytes.length; i++) webpArr[i] = webpBytes.charCodeAt(i);
+  const webpBlob  = new Blob([webpArr], { type: 'image/webp' });
+  const webpSrc   = URL.createObjectURL(webpBlob);
 
   const card = document.createElement('div');
   card.className = 'result-card';
@@ -172,29 +188,26 @@ function renderResult(r) {
     <div class="result-images">
       <div class="result-image-wrap">
         <div class="result-image-label">Avant</div>
-        <img src="data:${r.original_mime};base64,${r.original_b64}"
-             alt="Avant" class="result-image" loading="lazy">
+        <img src="${originalSrc}" alt="Avant" class="result-image" loading="lazy">
         <div class="result-image-size">${fmtSize(r.original_size)}</div>
       </div>
       <div class="result-arrow">→</div>
       <div class="result-image-wrap">
         <div class="result-image-label">Après (WebP)</div>
-        <img src="data:image/webp;base64,${r.webp_b64}"
-             alt="Après" class="result-image" loading="lazy">
+        <img src="${webpSrc}" alt="Après" class="result-image" loading="lazy">
         <div class="result-image-size result-size-new">${fmtSize(r.converted_size)}</div>
       </div>
     </div>
     <div class="result-footer">
       <span class="result-saving">Gain : ${fmtSize(saving)}</span>
-      <button class="btn btn-sm btn-outline"
-              data-b64="${r.webp_b64}" data-name="${escHtml(r.webp_name)}">
+      <button class="btn btn-sm btn-outline" data-name="${escHtml(r.webp_name)}">
         ⬇ Télécharger
       </button>
     </div>`;
 
-  card.querySelector('[data-b64]').addEventListener('click', (e) => {
-    const btn = e.currentTarget;
-    downloadWebp(btn.dataset.b64, btn.dataset.name);
+  // Téléchargement depuis le blob déjà créé (pas de re-décodage base64)
+  card.querySelector('[data-name]').addEventListener('click', () => {
+    triggerDownload(webpBlob, r.webp_name);
   });
 
   resultsContainer.appendChild(card);
