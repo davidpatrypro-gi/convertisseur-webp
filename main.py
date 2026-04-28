@@ -143,15 +143,25 @@ except FileNotFoundError:
 def _to_webp(content: bytes, quality: int) -> bytes:
     """Conversion synchrone — exécutée dans le thread pool."""
     img = Image.open(io.BytesIO(content))
+
+    # Redimensionnement automatique si > 4096 px (photos RAW / haute résolution)
+    # Évite les temps de traitement excessifs sur serveur CPU limité
+    MAX_DIM = 4096
+    if img.width > MAX_DIM or img.height > MAX_DIM:
+        img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
+
+    # Gestion de la transparence
     if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
         bg = Image.new("RGB", img.size, (255, 255, 255))
         src = img.convert("RGBA")
         bg.paste(src, mask=src.split()[3])
         img = bg
-    else:
+    elif img.mode != "RGB":
         img = img.convert("RGB")
+
     buf = io.BytesIO()
-    img.save(buf, format="WebP", quality=quality)
+    # method=2 : 3-4x plus rapide que le défaut (4), différence de qualité invisible
+    img.save(buf, format="WebP", quality=quality, method=2)
     return buf.getvalue()
 
 

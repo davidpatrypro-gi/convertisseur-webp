@@ -112,6 +112,13 @@ async function convertAll() {
 
   // Un POST par fichier, tous lancés en parallèle.
   // Chaque résultat s'affiche dès qu'il est prêt → pas d'attente de la dernière image.
+  // Message de patience si le serveur met du temps à répondre (cold start Render)
+  const wakeTimer = setTimeout(() => {
+    if (done === 0) {
+      progressText.textContent = 'Démarrage du serveur… quelques secondes encore ⏳';
+    }
+  }, 4000);
+
   const tasks = uploadedFiles.map((file) => {
     const fd = new FormData();
     fd.append('files', file);
@@ -136,6 +143,7 @@ async function convertAll() {
   });
 
   await Promise.all(tasks);
+  clearTimeout(wakeTimer);
 
   progressBar.style.width = '100%';
   setTimeout(() => progressWrap.classList.add('hidden'), 300);
