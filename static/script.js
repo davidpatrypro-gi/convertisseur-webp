@@ -23,6 +23,32 @@ const zipWrap           = document.getElementById('zip-wrap');
 const zipBtn            = document.getElementById('zip-btn');
 const fileListContainer = document.getElementById('file-list');
 
+// ── Pré-chauffage serveur ──────────────────────────────────────────────────────
+// Ping dès le chargement de la page : si le serveur dormait, il se réveille
+// pendant que l'utilisateur choisit ses fichiers, pas au moment de convertir.
+let _serverReady = false;
+const _pingStart = Date.now();
+
+fetch('/api/ping')
+  .then((r) => r.json())
+  .then(() => {
+    _serverReady = true;
+    const ms = Date.now() - _pingStart;
+    if (ms > 3000) {
+      // Cold start détecté : on affiche un bandeau discret sur la drop zone
+      const banner = document.createElement('p');
+      banner.id = 'server-banner';
+      banner.style.cssText =
+        'font-size:.8rem;color:#a16207;background:#fef9c3;border-radius:6px;' +
+        'padding:.4rem .75rem;margin-top:.5rem;text-align:center;';
+      banner.textContent = '⚠️ Serveur en cours de démarrage, première conversion peut prendre quelques secondes.';
+      const dz = document.getElementById('drop-zone');
+      if (dz) dz.after(banner);
+      setTimeout(() => banner.remove(), 15000);
+    }
+  })
+  .catch(() => { _serverReady = true; }); // on continue même si le ping échoue
+
 // ── Init ───────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   qualitySlider.addEventListener('input', () => {
@@ -112,12 +138,12 @@ async function convertAll() {
 
   // Un POST par fichier, tous lancés en parallèle.
   // Chaque résultat s'affiche dès qu'il est prêt → pas d'attente de la dernière image.
-  // Message de patience si la conversion dure un peu (image volumineuse)
+  // Message de patience si une image volumineuse prend du temps
   const wakeTimer = setTimeout(() => {
-    if (done === 0) {
-      progressText.textContent = 'Conversion en cours, image volumineuse détectée… ⏳';
+    if (done < total) {
+      progressText.textContent = 'Traitement en cours, image volumineuse… ⏳';
     }
-  }, 8000);
+  }, 10000);
 
   const tasks = uploadedFiles.map((file) => {
     const fd = new FormData();

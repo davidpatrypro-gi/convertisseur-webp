@@ -144,11 +144,10 @@ def _to_webp(content: bytes, quality: int) -> bytes:
     """Conversion synchrone — exécutée dans le thread pool."""
     img = Image.open(io.BytesIO(content))
 
-    # Redimensionnement automatique si > 2000 px (photos de téléphone, RAW…)
-    # Au-delà, le gain en qualité web est nul et le temps de traitement explose
+    # Resize si > 2000px — BILINEAR : 3x plus rapide que LANCZOS, imperceptible en WebP
     MAX_DIM = 2000
     if img.width > MAX_DIM or img.height > MAX_DIM:
-        img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)
+        img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
     # Gestion de la transparence
     if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
@@ -160,8 +159,8 @@ def _to_webp(content: bytes, quality: int) -> bytes:
         img = img.convert("RGB")
 
     buf = io.BytesIO()
-    # method=1 : encodage rapide, qualité identique à l'œil pour le web
-    img.save(buf, format="WebP", quality=quality, method=1)
+    # method=0 : encodage le plus rapide, qualité suffisante pour le web
+    img.save(buf, format="WebP", quality=quality, method=0)
     return buf.getvalue()
 
 
@@ -380,6 +379,12 @@ async def api_contact(form: ContactForm):
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=500)
 
     return JSONResponse({"ok": True})
+
+
+@app.get("/api/ping")
+async def ping():
+    """Endpoint de diagnostic — répond instantanément, permet de détecter le cold start."""
+    return JSONResponse({"ok": True, "ts": datetime.now().isoformat()})
 
 
 @app.get("/contact", response_class=HTMLResponse)
