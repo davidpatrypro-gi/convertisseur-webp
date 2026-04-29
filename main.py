@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import io
+import json
 import sqlite3
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
@@ -73,6 +74,11 @@ app = FastAPI(title="ConvertWebP — Convertisseur images en ligne")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 templates = Jinja2Templates(directory="templates")
+
+# Chargement de la config avis Trustpilot — injecté globalement dans tous les templates
+with open("reviews_config.json") as _f:
+    _reviews_cfg = json.load(_f)
+templates.env.globals["reviews"] = _reviews_cfg["trustpilot"]
 
 
 @app.exception_handler(404)

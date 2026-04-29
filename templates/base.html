@@ -87,14 +87,14 @@
 
 <!-- ── Bandeau Trustpilot ───────────────────────────────────────────────────── -->
 <div style="background:#000; border-bottom:1px solid #e8e8e8; padding:18px 0; text-align:center;">
-  <a href="https://fr.trustpilot.com/review/convertwebp.fr"
+  <a href="{{ reviews.url }}"
      target="_blank" rel="noopener"
      style="display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:#191919; font-size:20px;">
     <span style="color:#00b67a; font-weight:700; font-size:21px;">★ Trustpilot</span>
     <span style="color:#00b67a;">★★★★★</span>
     <span style="font-weight:600; color:#fff;">Excellent</span>
     <span style="color:#666;">·</span>
-    <span style="color:#00b67a;">Donnez votre avis →</span>
+    <span style="color:#00b67a;">{{ reviews.rating }} · {{ reviews.review_count }} avis vérifiés</span>
   </a>
 </div>
 
