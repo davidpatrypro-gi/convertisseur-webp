@@ -538,19 +538,6 @@ async def stats_dashboard(request: Request, key: str = ""):
     return templates.TemplateResponse(request, "stats.html", ctx)
 
 
-# ── SEO files ──────────────────────────────────────────────────────────────────
-
-@app.get("/robots.txt")
-async def robots_txt():
-    return Response(
-        content=(
-            "User-agent: *\n"
-            "Allow: /\n"
-            "Disallow: /api/\n\n"
-            "Sitemap: https://convertwebp.fr/sitemap.xml\n"
-        ),
-        media_type="text/plain",
-    )
 
 
 @app.get("/sitemap.xml")

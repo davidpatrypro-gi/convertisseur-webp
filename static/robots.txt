@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-
+Allow: /api/ping
 Disallow: /api/
 
 Sitemap: https://convertwebp.fr/sitemap.xml
