@@ -68,24 +68,16 @@
       <!-- Left: upload + results -->
       <div>
 
-        <!-- Bandeau WebP détecté (masqué par défaut) -->
-        <div id="webp-notice" class="hidden"
-             style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;
-                    padding:.75rem 1rem;margin-bottom:1rem;font-size:.875rem;color:#92400e;">
-          ⚠️ Votre image est déjà en WebP ! Vous cherchez à <strong>convertir en WebP</strong> ?
-          <a href="/" style="color:#6c63ff;font-weight:600;">Utilisez notre convertisseur →</a>
-        </div>
-
         <!-- Drop zone -->
         <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
              aria-label="Déposez ou cliquez pour uploader vos images">
           <div class="drop-icon">🗜️</div>
           <h2>Déposez vos images ici</h2>
-          <p>ou cliquez pour sélectionner vos fichiers JPG / PNG</p>
-          <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp"
+          <p>ou cliquez pour sélectionner vos fichiers</p>
+          <input type="file" id="file-input" accept="image/*"
                  multiple style="display:none" aria-hidden="true">
           <button class="btn btn-primary" type="button">Choisir des fichiers</button>
-          <p class="drop-formats">JPG, JPEG, PNG · plusieurs fichiers acceptés</p>
+          <p class="drop-formats">JPG, PNG, WebP et autres formats · plusieurs fichiers acceptés</p>
         </div>
 
         <!-- Compress button -->

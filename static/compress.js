@@ -22,7 +22,6 @@ const statPct           = document.getElementById('stat-pct');
 const zipWrap           = document.getElementById('zip-wrap');
 const zipBtn            = document.getElementById('zip-btn');
 const fileListContainer = document.getElementById('file-list');
-const webpNotice        = document.getElementById('webp-notice');
 
 // ── Pré-chauffage serveur ──────────────────────────────────────────────────────
 const _pingStart = Date.now();
@@ -72,27 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── File handling ──────────────────────────────────────────────────────────────
-function isCompressable(file) {
-  return ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type);
+function isImage(file) {
+  return file.type.startsWith('image/');
 }
 
 function handleFiles(files) {
-  let hasWebp = false;
-  const valid = [];
-
-  files.forEach((file) => {
-    if (file.type === 'image/webp') {
-      hasWebp = true;
-    } else if (isCompressable(file)) {
-      valid.push(file);
-    }
-  });
-
-  // Affiche le bandeau WebP si nécessaire
-  if (hasWebp && webpNotice) webpNotice.classList.remove('hidden');
-
+  const valid = files.filter(isImage);
   if (!valid.length) return;
-
   uploadedFiles = [...uploadedFiles, ...valid];
   renderFileList();
   convertBtn.disabled = false;
@@ -233,7 +218,13 @@ function renderResult(r, originalFile) {
       <button class="btn btn-sm btn-outline" data-name="${escHtml(r.compressed_name)}">
         ⬇ Télécharger
       </button>
-    </div>`;
+    </div>
+    ${r.mime === 'image/jpeg' ? `
+    <p style="font-size:.78rem;color:#555;background:#f0eeff;border-radius:0 0 10px 10px;
+              padding:.45rem .85rem;margin:0;text-align:center;">
+      💡 Réduire encore plus ?
+      <a href="/" style="color:#6c63ff;font-weight:600;">Convertir en WebP pour −90% →</a>
+    </p>` : ''}`;
 
   card.querySelector('[data-name]').addEventListener('click', () => {
     triggerDownload(compBlob, r.compressed_name);

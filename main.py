@@ -196,11 +196,21 @@ def _compress(content: bytes, filename: str, quality: int):
             img = img.convert('RGB')
         img.save(buf, format='JPEG', quality=quality, optimize=True)
         return buf.getvalue(), 'jpg', 'image/jpeg'
-    else:  # PNG — format sans perte, transparence conservée
+    elif ext == 'webp':
+        if img.mode not in ('RGB', 'RGBA'):
+            img = img.convert('RGBA' if img.mode in ('LA', 'PA', 'P') else 'RGB')
+        img.save(buf, format='WebP', quality=quality, method=0)
+        return buf.getvalue(), 'webp', 'image/webp'
+    elif ext == 'png':  # PNG — format sans perte, transparence conservée
         if img.mode == 'P':
             img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
         img.save(buf, format='PNG', optimize=True, compress_level=9)
         return buf.getvalue(), 'png', 'image/png'
+    else:  # Fallback : on compresse en JPEG
+        if img.mode not in ('RGB', 'L'):
+            img = img.convert('RGB')
+        img.save(buf, format='JPEG', quality=quality, optimize=True)
+        return buf.getvalue(), 'jpg', 'image/jpeg'
 
 
 async def _compress_async(content: bytes, filename: str, quality: int):

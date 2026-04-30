@@ -256,6 +256,20 @@ function renderStats() {
   statConverted.textContent = fmtSize(conv);
   statGain.textContent      = fmtSize(gain);
   statPct.textContent       = pct + '%';
+
+  // Lien croisé vers le compresseur
+  if (!document.getElementById('compress-crosslink')) {
+    const tip = document.createElement('p');
+    tip.id = 'compress-crosslink';
+    tip.style.cssText =
+      'font-size:.82rem;text-align:center;margin-top:.75rem;color:#555;' +
+      'background:#f0eeff;border-radius:8px;padding:.55rem .9rem;';
+    tip.innerHTML =
+      '💡 Pour aller encore plus loin, ' +
+      '<a href="/compresser-images" style="color:#6c63ff;font-weight:600;">' +
+      'compressez vos autres images JPG/PNG sans changer de format →</a>';
+    statsContainer.appendChild(tip);
+  }
 }
 
 // ── Trustpilot popup ──────────────────────────────────────────────────────────
