@@ -196,7 +196,7 @@ function renderResult(r, originalFile) {
   const compSrc   = URL.createObjectURL(compBlob);
 
   // Libellé du format de sortie
-  const fmtLabel = r.mime === 'image/png' ? 'PNG' : 'JPG';
+  const fmtLabel = r.mime === 'image/png' ? 'PNG' : r.mime === 'image/webp' ? 'WebP' : 'JPG';
 
   const card = document.createElement('div');
   card.className = 'result-card';
@@ -338,12 +338,16 @@ function shouldShowTpPopup() {
 
 function scheduleTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
-  setTimeout(() => showTpPopup(savedBytes), TP_DELAY_MS);
+  setTimeout(() => {
+    // TP prend priorité : ferme tout popup existant (cross-tool, etc.)
+    const existing = document.querySelector('.tp-overlay');
+    if (existing) existing.remove();
+    showTpPopup(savedBytes);
+  }, TP_DELAY_MS);
 }
 
 function showTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
-  if (document.querySelector('.tp-overlay')) return; // un popup est déjà ouvert
   const saved = fmtSize(savedBytes);
   const overlay = document.createElement('div');
   overlay.className = 'tp-overlay';
@@ -351,7 +355,10 @@ function showTpPopup(savedBytes) {
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', 'tp-title');
   overlay.innerHTML = `
-    <div class="tp-popup">
+    <div class="tp-popup" style="position:relative;">
+      <button id="tp-btn-close" aria-label="Fermer"
+        style="position:absolute;top:10px;left:12px;background:none;border:none;
+               cursor:pointer;font-size:1.2rem;color:#ccc;padding:0;line-height:1;">←</button>
       <div class="tp-popup-stars">★★★★★</div>
       <h2 class="tp-popup-title" id="tp-title">Votre avis compte !</h2>
       <p class="tp-popup-body">
@@ -362,7 +369,6 @@ function showTpPopup(savedBytes) {
         <a href="${TP_URL}" target="_blank" rel="noopener" class="tp-btn-review" id="tp-btn-review">
           Laisser un avis ⭐
         </a>
-        <button class="tp-btn-later" id="tp-btn-later">Plus tard</button>
       </div>
       <div class="tp-popup-logo">Trustpilot</div>
     </div>`;
@@ -372,7 +378,7 @@ function showTpPopup(savedBytes) {
     localStorage.setItem(TP_DONE_KEY, '1');
     closeTp(overlay);
   });
-  document.getElementById('tp-btn-later').addEventListener('click', () => snoozeTp(overlay));
+  document.getElementById('tp-btn-close').addEventListener('click', () => snoozeTp(overlay));
 }
 
 function snoozeTp(overlay) {

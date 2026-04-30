@@ -273,13 +273,16 @@ function shouldShowTpPopup() {
 
 function scheduleTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
-  console.log('popup déclenché dans ' + TP_DELAY_MS + 'ms (gain : ' + fmtSize(savedBytes) + ')');
-  setTimeout(() => showTpPopup(savedBytes), TP_DELAY_MS);
+  setTimeout(() => {
+    // TP prend priorité : ferme tout popup existant (cross-tool, etc.)
+    const existing = document.querySelector('.tp-overlay');
+    if (existing) existing.remove();
+    showTpPopup(savedBytes);
+  }, TP_DELAY_MS);
 }
 
 function showTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
-  if (document.querySelector('.tp-overlay')) return; // un popup est déjà ouvert
 
   const saved = fmtSize(savedBytes);
 
@@ -289,7 +292,10 @@ function showTpPopup(savedBytes) {
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', 'tp-title');
   overlay.innerHTML = `
-    <div class="tp-popup">
+    <div class="tp-popup" style="position:relative;">
+      <button id="tp-btn-close" aria-label="Fermer"
+        style="position:absolute;top:10px;left:12px;background:none;border:none;
+               cursor:pointer;font-size:1.2rem;color:#ccc;padding:0;line-height:1;">←</button>
       <div class="tp-popup-stars">★★★★★</div>
       <h2 class="tp-popup-title" id="tp-title">Votre avis compte !</h2>
       <p class="tp-popup-body">
@@ -301,26 +307,17 @@ function showTpPopup(savedBytes) {
            class="tp-btn-review" id="tp-btn-review">
           Laisser un avis ⭐
         </a>
-        <button class="tp-btn-later" id="tp-btn-later">Plus tard</button>
       </div>
       <div class="tp-popup-logo">Trustpilot</div>
     </div>`;
 
   document.body.appendChild(overlay);
-
-  // Close on overlay click (outside popup)
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) snoozeTp(overlay);
-  });
-
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) snoozeTp(overlay); });
   document.getElementById('tp-btn-review').addEventListener('click', () => {
     localStorage.setItem(TP_DONE_KEY, '1');
     closeTp(overlay);
   });
-
-  document.getElementById('tp-btn-later').addEventListener('click', () => {
-    snoozeTp(overlay);
-  });
+  document.getElementById('tp-btn-close').addEventListener('click', () => snoozeTp(overlay));
 }
 
 function snoozeTp(overlay) {
@@ -391,8 +388,8 @@ function showCrossPopup() {
       <div class="tp-popup-stars">🗜️</div>
       <h2 class="tp-popup-title">Aller encore plus loin ?</h2>
       <p class="tp-popup-body">
-        Vous avez d'autres images JPG ou PNG ?<br>
-        Compressez-les <strong>sans changer de format</strong> grâce à notre outil dédié.
+        Vos nouvelles images WebP peuvent encore être allégées.<br>
+        Notre compresseur réduit le poids <strong>sans changer de format</strong>.
       </p>
       <div class="tp-popup-cta">
         <a href="/compresser-images" class="tp-btn-review">Compresser mes images →</a>
