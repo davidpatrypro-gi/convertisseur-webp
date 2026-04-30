@@ -259,8 +259,8 @@ function renderStats() {
 
 // ── Trustpilot popup ──────────────────────────────────────────────────────────
 const TP_URL        = 'https://fr.trustpilot.com/review/convertwebp.fr';
-const TP_LATER_KEY  = 'tp_later_until';
-const TP_DONE_KEY   = 'tp_reviewed';
+const TP_LATER_KEY  = 'tp_later_v2';
+const TP_DONE_KEY   = 'tp_done_v2';
 const TP_DELAY_MS   = 3000;
 const TP_SNOOZE_DAYS = 7;
 
@@ -279,6 +279,7 @@ function scheduleTpPopup(savedBytes) {
 
 function showTpPopup(savedBytes) {
   if (!shouldShowTpPopup()) return;
+  if (document.querySelector('.tp-overlay')) return; // un popup est déjà ouvert
 
   const saved = fmtSize(savedBytes);
 
@@ -370,7 +371,7 @@ function triggerDownload(blob, filename) {
 }
 
 // ── Popup cross-tool (vers le compresseur) ────────────────────────────────────
-const CROSS_KEY      = 'cross_compress_shown';
+const CROSS_KEY      = 'cross_compress_v2';
 const CROSS_DELAY_MS = 3500;
 
 function scheduleCrossPopup() {
@@ -380,6 +381,7 @@ function scheduleCrossPopup() {
 
 function showCrossPopup() {
   if (localStorage.getItem(CROSS_KEY)) return;
+  if (document.querySelector('.tp-overlay')) return; // un popup est déjà ouvert
   const overlay = document.createElement('div');
   overlay.className = 'tp-overlay';
   overlay.setAttribute('role', 'dialog');
