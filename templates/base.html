@@ -87,15 +87,35 @@
 </header>
 
 <!-- ── Bandeau Trustpilot ───────────────────────────────────────────────────── -->
-<div style="background:#000; border-bottom:1px solid #e8e8e8; padding:18px 0; text-align:center;">
-  <a href="{{ reviews.url }}"
-     target="_blank" rel="noopener"
-     style="display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:#191919; font-size:20px;">
-    <span style="color:#00b67a; font-weight:700; font-size:21px;">★ Trustpilot</span>
-    <span style="color:#00b67a;">★★★★★</span>
-    <span style="font-weight:600; color:#fff;">Excellent</span>
-    <span style="color:#666;">·</span>
-    <span style="color:#00b67a;">{{ reviews.rating }} · {{ reviews.review_count }} avis vérifiés</span>
+<style>
+  .tp-bar { background:#000; border-bottom:1px solid #222; padding:14px 16px; text-align:center; }
+  .tp-link {
+    display: inline-flex; align-items: center; flex-wrap: wrap; justify-content: center;
+    gap: 8px; text-decoration: none; font-size: 17px; line-height: 1;
+  }
+  .tp-brand  { color:#00b67a; font-weight:700; font-size:18px; white-space:nowrap; }
+  .tp-stars  { color:#00b67a; white-space:nowrap; letter-spacing:1px; }
+  .tp-label  { color:#fff; font-weight:600; white-space:nowrap; }
+  .tp-dot    { color:#555; }
+  .tp-count  { color:#00b67a; white-space:nowrap; }
+
+  @media (max-width: 480px) {
+    .tp-bar  { padding:11px 12px; }
+    .tp-link { gap:6px; font-size:14px; }
+    .tp-brand { font-size:15px; }
+  }
+  @media (max-width: 360px) {
+    .tp-label, .tp-dot { display:none; }
+    .tp-link { gap:5px; font-size:13px; }
+  }
+</style>
+<div class="tp-bar">
+  <a href="{{ reviews.url }}" target="_blank" rel="noopener" class="tp-link">
+    <span class="tp-brand">★ Trustpilot</span>
+    <span class="tp-stars">★★★★★</span>
+    <span class="tp-label">Excellent</span>
+    <span class="tp-dot">·</span>
+    <span class="tp-count">{{ reviews.rating }} · {{ reviews.review_count }} avis vérifiés</span>
   </a>
 </div>
 
