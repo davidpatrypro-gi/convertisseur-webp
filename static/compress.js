@@ -172,6 +172,8 @@ async function compressAll() {
     statsContainer.classList.remove('hidden');
     if (convertedResults.length > 1) zipWrap.classList.remove('hidden');
     statsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Popup cross-tool (vers le convertisseur WebP) après 3,5s
+    scheduleCrossPopup();
   }
 }
 
@@ -231,6 +233,7 @@ function renderResult(r, originalFile) {
 
   card.querySelector('[data-name]').addEventListener('click', () => {
     triggerDownload(compBlob, r.compressed_name);
+    scheduleTpPopup(r.original_size - r.compressed_size);
   });
 
   resultsContainer.appendChild(card);
@@ -259,6 +262,8 @@ async function downloadZip() {
     const res  = await fetch('/api/compress-zip', { method: 'POST', body: fd });
     const blob = await res.blob();
     triggerDownload(blob, 'images_compressed.zip');
+    const totalGain = convertedResults.reduce((s, r) => s + (r.original_size - r.compressed_size), 0);
+    scheduleTpPopup(totalGain);
   } finally {
     zipBtn.disabled    = false;
     zipBtn.textContent = '⬇ Télécharger toutes les images en ZIP';
@@ -270,6 +275,111 @@ function triggerDownload(blob, filename) {
   const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── Popup cross-tool (vers le convertisseur WebP) ────────────────────────────
+const CROSS_KEY      = 'cross_webp_shown';
+const CROSS_DELAY_MS = 3500;
+
+function scheduleCrossPopup() {
+  if (localStorage.getItem(CROSS_KEY)) return;
+  setTimeout(showCrossPopup, CROSS_DELAY_MS);
+}
+
+function showCrossPopup() {
+  if (localStorage.getItem(CROSS_KEY)) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'tp-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.innerHTML = `
+    <div class="tp-popup">
+      <div class="tp-popup-stars">⚡</div>
+      <h2 class="tp-popup-title">Réduire encore plus ?</h2>
+      <p class="tp-popup-body">
+        Convertissez vos images au format <strong>WebP</strong> pour réduire leur poids
+        jusqu'à <strong>90%</strong> — bien plus qu'une simple compression.
+      </p>
+      <div class="tp-popup-cta">
+        <a href="/" class="tp-btn-review">Convertir en WebP →</a>
+        <button class="tp-btn-later" id="cross-btn-later">Non merci</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCrossPopup(overlay); });
+  document.getElementById('cross-btn-later').addEventListener('click', () => {
+    localStorage.setItem(CROSS_KEY, '1');
+    closeCrossPopup(overlay);
+  });
+}
+
+function closeCrossPopup(overlay) {
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .2s ease';
+  setTimeout(() => overlay.remove(), 200);
+}
+
+// ── Popup Trustpilot ─────────────────────────────────────────────────────────
+const TP_URL         = 'https://fr.trustpilot.com/review/convertwebp.fr';
+const TP_LATER_KEY   = 'tp_later_until';
+const TP_DONE_KEY    = 'tp_reviewed';
+const TP_DELAY_MS    = 1500;
+const TP_SNOOZE_DAYS = 7;
+
+function shouldShowTpPopup() {
+  if (localStorage.getItem(TP_DONE_KEY)) return false;
+  const until = localStorage.getItem(TP_LATER_KEY);
+  if (until && Date.now() < parseInt(until, 10)) return false;
+  return true;
+}
+
+function scheduleTpPopup(savedBytes) {
+  if (!shouldShowTpPopup()) return;
+  setTimeout(() => showTpPopup(savedBytes), TP_DELAY_MS);
+}
+
+function showTpPopup(savedBytes) {
+  if (!shouldShowTpPopup()) return;
+  const saved = fmtSize(savedBytes);
+  const overlay = document.createElement('div');
+  overlay.className = 'tp-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'tp-title');
+  overlay.innerHTML = `
+    <div class="tp-popup">
+      <div class="tp-popup-stars">★★★★★</div>
+      <h2 class="tp-popup-title" id="tp-title">Votre avis compte !</h2>
+      <p class="tp-popup-body">
+        Vous venez d'économiser <strong>${saved}</strong>&nbsp;!<br>
+        Si l'outil vous a plu, 30 secondes sur Trustpilot nous aident énormément.
+      </p>
+      <div class="tp-popup-cta">
+        <a href="${TP_URL}" target="_blank" rel="noopener" class="tp-btn-review" id="tp-btn-review">
+          Laisser un avis ⭐
+        </a>
+        <button class="tp-btn-later" id="tp-btn-later">Plus tard</button>
+      </div>
+      <div class="tp-popup-logo">Trustpilot</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) snoozeTp(overlay); });
+  document.getElementById('tp-btn-review').addEventListener('click', () => {
+    localStorage.setItem(TP_DONE_KEY, '1');
+    closeTp(overlay);
+  });
+  document.getElementById('tp-btn-later').addEventListener('click', () => snoozeTp(overlay));
+}
+
+function snoozeTp(overlay) {
+  localStorage.setItem(TP_LATER_KEY, (Date.now() + TP_SNOOZE_DAYS * 86400000).toString());
+  closeTp(overlay);
+}
+
+function closeTp(overlay) {
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .2s ease';
+  setTimeout(() => overlay.remove(), 200);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

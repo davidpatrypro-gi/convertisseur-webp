@@ -180,10 +180,8 @@ async function convertAll() {
     statsContainer.classList.remove('hidden');
     if (convertedResults.length > 1) zipWrap.classList.remove('hidden');
     statsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const totalGain = convertedResults.reduce(
-      (s, r) => s + (r.original_size - r.converted_size), 0
-    );
-    scheduleTpPopup(totalGain);
+    // Popup cross-tool (vers le compresseur) après 3,5s
+    scheduleCrossPopup();
   }
 }
 
@@ -239,9 +237,10 @@ function renderResult(r, originalFile) {
       </button>
     </div>`;
 
-  // Téléchargement depuis le blob déjà créé (pas de re-décodage base64)
+  // Téléchargement + popup TP après le clic
   card.querySelector('[data-name]').addEventListener('click', () => {
     triggerDownload(webpBlob, r.webp_name);
+    scheduleTpPopup(r.original_size - r.converted_size);
   });
 
   resultsContainer.appendChild(card);
@@ -256,20 +255,6 @@ function renderStats() {
   statConverted.textContent = fmtSize(conv);
   statGain.textContent      = fmtSize(gain);
   statPct.textContent       = pct + '%';
-
-  // Lien croisé vers le compresseur
-  if (!document.getElementById('compress-crosslink')) {
-    const tip = document.createElement('p');
-    tip.id = 'compress-crosslink';
-    tip.style.cssText =
-      'font-size:.82rem;text-align:center;margin-top:.75rem;color:#555;' +
-      'background:#f0eeff;border-radius:8px;padding:.55rem .9rem;';
-    tip.innerHTML =
-      '💡 Pour aller encore plus loin, ' +
-      '<a href="/compresser-images" style="color:#6c63ff;font-weight:600;">' +
-      'compressez vos autres images JPG/PNG sans changer de format →</a>';
-    statsContainer.appendChild(tip);
-  }
 }
 
 // ── Trustpilot popup ──────────────────────────────────────────────────────────
@@ -368,6 +353,9 @@ async function downloadZip() {
     const res  = await fetch('/api/convert-zip', { method: 'POST', body: fd });
     const blob = await res.blob();
     triggerDownload(blob, 'images_webp.zip');
+    // Popup TP après téléchargement ZIP
+    const totalGain = convertedResults.reduce((s, r) => s + (r.original_size - r.converted_size), 0);
+    scheduleTpPopup(totalGain);
   } finally {
     zipBtn.disabled = false;
     zipBtn.textContent = '⬇ Télécharger toutes les images en ZIP';
@@ -379,6 +367,48 @@ function triggerDownload(blob, filename) {
   const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── Popup cross-tool (vers le compresseur) ────────────────────────────────────
+const CROSS_KEY      = 'cross_compress_shown';
+const CROSS_DELAY_MS = 3500;
+
+function scheduleCrossPopup() {
+  if (localStorage.getItem(CROSS_KEY)) return;
+  setTimeout(showCrossPopup, CROSS_DELAY_MS);
+}
+
+function showCrossPopup() {
+  if (localStorage.getItem(CROSS_KEY)) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'tp-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.innerHTML = `
+    <div class="tp-popup">
+      <div class="tp-popup-stars">🗜️</div>
+      <h2 class="tp-popup-title">Aller encore plus loin ?</h2>
+      <p class="tp-popup-body">
+        Vous avez d'autres images JPG ou PNG ?<br>
+        Compressez-les <strong>sans changer de format</strong> grâce à notre outil dédié.
+      </p>
+      <div class="tp-popup-cta">
+        <a href="/compresser-images" class="tp-btn-review">Compresser mes images →</a>
+        <button class="tp-btn-later" id="cross-btn-later">Non merci</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCrossPopup(overlay); });
+  document.getElementById('cross-btn-later').addEventListener('click', () => {
+    localStorage.setItem(CROSS_KEY, '1');
+    closeCrossPopup(overlay);
+  });
+}
+
+function closeCrossPopup(overlay) {
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .2s ease';
+  setTimeout(() => overlay.remove(), 200);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
