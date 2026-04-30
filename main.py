@@ -178,6 +178,37 @@ async def _to_webp_async(content: bytes, quality: int) -> bytes:
     return await loop.run_in_executor(_executor, _to_webp, content, quality)
 
 
+def _compress(content: bytes, filename: str, quality: int):
+    """Compression synchrone dans le format d'origine (JPG→JPG, PNG→PNG).
+    Retourne (compressed_bytes, out_extension, mime_type)."""
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'jpg'
+    img = Image.open(io.BytesIO(content))
+
+    # Resize si > 5 Mo et dimension > 4000px (même règle que la conversion WebP)
+    MAX_BYTES = 5 * 1024 * 1024
+    MAX_DIM   = 4000
+    if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
+        img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
+
+    buf = io.BytesIO()
+    if ext in ('jpg', 'jpeg'):
+        if img.mode not in ('RGB', 'L'):
+            img = img.convert('RGB')
+        img.save(buf, format='JPEG', quality=quality, optimize=True)
+        return buf.getvalue(), 'jpg', 'image/jpeg'
+    else:  # PNG — format sans perte, transparence conservée
+        if img.mode == 'P':
+            img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
+        img.save(buf, format='PNG', optimize=True, compress_level=9)
+        return buf.getvalue(), 'png', 'image/png'
+
+
+async def _compress_async(content: bytes, filename: str, quality: int):
+    """Lance _compress dans le thread pool sans bloquer la boucle asyncio."""
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(_executor, _compress, content, filename, quality)
+
+
 async def _zip_stream(entries: List[tuple]) -> AsyncGenerator[bytes, None]:
     """Génère le ZIP en chunks de 64 Ko pour StreamingResponse."""
     zip_buf = io.BytesIO()
@@ -400,6 +431,11 @@ async def contact(request: Request):
     return templates.TemplateResponse(request, "contact.html")
 
 
+@app.get("/compresser-images", response_class=HTMLResponse)
+async def compresser_images(request: Request):
+    return templates.TemplateResponse(request, "compresser-images.html")
+
+
 @app.post("/api/convert")
 async def api_convert(
     files: List[UploadFile] = File(...),
@@ -460,6 +496,48 @@ async def api_convert_zip(
         _zip_stream(entries),
         media_type="application/zip",
         headers={"Content-Disposition": 'attachment; filename="images_webp.zip"'},
+    )
+
+
+@app.post("/api/compress")
+async def api_compress(
+    files: List[UploadFile] = File(...),
+    quality: int = Form(60),
+):
+    contents = await asyncio.gather(*[f.read() for f in files])
+    results  = await asyncio.gather(
+        *[_compress_async(c, f.filename, quality) for c, f in zip(contents, files)]
+    )
+    return [
+        {
+            "original_name":    file.filename,
+            "compressed_name":  f"compressed_{file.filename.rsplit('.', 1)[0]}.{ext}",
+            "original_size":    len(content),
+            "compressed_size":  len(compressed),
+            "compressed_b64":   base64.b64encode(compressed).decode(),
+            "mime":             mime,
+        }
+        for file, content, (compressed, ext, mime) in zip(files, contents, results)
+    ]
+
+
+@app.post("/api/compress-zip")
+async def api_compress_zip(
+    files: List[UploadFile] = File(...),
+    quality: int = Form(60),
+):
+    contents = await asyncio.gather(*[f.read() for f in files])
+    results  = await asyncio.gather(
+        *[_compress_async(c, f.filename, quality) for c, f in zip(contents, files)]
+    )
+    entries = [
+        (f"compressed_{f.filename.rsplit('.', 1)[0]}.{ext}", compressed)
+        for f, (compressed, ext, _mime) in zip(files, results)
+    ]
+    return StreamingResponse(
+        _zip_stream(entries),
+        media_type="application/zip",
+        headers={"Content-Disposition": 'attachment; filename="images_compressed.zip"'},
     )
 
 
@@ -540,33 +618,3 @@ async def stats_dashboard(request: Request, key: str = ""):
 
 
 
-@app.get("/sitemap.xml")
-async def sitemap_xml():
-    today = date.today().isoformat()
-    pages = [
-        ("https://convertwebp.fr/",                                              "1.0", "weekly"),
-        ("https://convertwebp.fr/blog",                                          "0.8", "weekly"),
-        ("https://convertwebp.fr/blog/pourquoi-convertir-images-webp-seo",       "0.7", "monthly"),
-        ("https://convertwebp.fr/blog/webp-vs-jpg-png-comparaison",              "0.7", "monthly"),
-        ("https://convertwebp.fr/blog/optimiser-images-vitesse-site-google",     "0.7", "monthly"),
-        ("https://convertwebp.fr/blog/seo-local-2026-guide-complet",             "0.8", "monthly"),
-        ("https://convertwebp.fr/contact",                                       "0.6", "monthly"),
-        ("https://convertwebp.fr/mentions-legales",                              "0.2", "yearly"),
-        ("https://convertwebp.fr/politique-confidentialite",                     "0.2", "yearly"),
-    ]
-    entries = "\n".join(
-        f"  <url>\n"
-        f"    <loc>{loc}</loc>\n"
-        f"    <lastmod>{today}</lastmod>\n"
-        f"    <changefreq>{freq}</changefreq>\n"
-        f"    <priority>{prio}</priority>\n"
-        f"  </url>"
-        for loc, prio, freq in pages
-    )
-    xml = (
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        f"{entries}\n"
-        "</urlset>"
-    )
-    return Response(content=xml, media_type="application/xml")

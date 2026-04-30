@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Compresser vos images JPG et PNG gratuitement | ConvertWebP{% endblock %}
+{% block description %}Compressez vos images JPG et PNG en ligne gratuitement. Réduisez le poids de vos photos sans perte de qualité visible. Rapide, gratuit, sans inscription.{% endblock %}
+{% block canonical %}https://convertwebp.fr/compresser-images{% endblock %}
+{% block og_title %}Compresser vos images JPG et PNG gratuitement | ConvertWebP{% endblock %}
+{% block og_description %}Compressez vos images JPG et PNG en ligne gratuitement. Réduisez le poids de vos photos sans perte de qualité visible.{% endblock %}
+{% block og_url %}https://convertwebp.fr/compresser-images{% endblock %}
+{% block tw_title %}Compresser vos images JPG et PNG | ConvertWebP{% endblock %}
+{% block tw_description %}Compressez vos images JPG et PNG gratuitement sans perte de qualité visible.{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://convertwebp.fr/" },
+    { "@type": "ListItem", "position": 2, "name": "Compresser images", "item": "https://convertwebp.fr/compresser-images" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "ConvertWebP — Compresseur d'images",
+  "url": "https://convertwebp.fr/compresser-images",
+  "description": "Compressez vos images JPG et PNG en ligne gratuitement sans perte de qualité visible.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "fr",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "publisher": { "@type": "Organization", "name": "ConvertWebP", "url": "https://convertwebp.fr" },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ reviews.rating }}",
+    "reviewCount": {{ reviews.review_count }}
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <h1>Compresser vos images<br><em>JPG &amp; PNG</em> gratuitement</h1>
+    <p>Réduisez le poids de vos photos sans changer de format et sans perte de qualité visible. Idéal pour optimiser vos images web en quelques clics.</p>
+    <div class="hero-badges">
+      <span class="hero-badge">✓ 100% gratuit</span>
+      <span class="hero-badge">✓ Sans inscription</span>
+      <span class="hero-badge">✓ JPG et PNG</span>
+      <span class="hero-badge">✓ Données non conservées</span>
+    </div>
+    <a href="#tool" class="btn btn-lg" style="background:white;color:var(--primary);">
+      Compresser mes images maintenant ↓
+    </a>
+  </div>
+</section>
+
+<!-- ── Tool ──────────────────────────────────────────────────────────────────── -->
+<section class="tool-section" id="tool">
+  <div class="container">
+    <div class="tool-layout">
+
+      <!-- Left: upload + results -->
+      <div>
+
+        <!-- Bandeau WebP détecté (masqué par défaut) -->
+        <div id="webp-notice" class="hidden"
+             style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;
+                    padding:.75rem 1rem;margin-bottom:1rem;font-size:.875rem;color:#92400e;">
+          ⚠️ Votre image est déjà en WebP ! Vous cherchez à <strong>convertir en WebP</strong> ?
+          <a href="/" style="color:#6c63ff;font-weight:600;">Utilisez notre convertisseur →</a>
+        </div>
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
+             aria-label="Déposez ou cliquez pour uploader vos images">
+          <div class="drop-icon">🗜️</div>
+          <h2>Déposez vos images ici</h2>
+          <p>ou cliquez pour sélectionner vos fichiers JPG / PNG</p>
+          <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp"
+                 multiple style="display:none" aria-hidden="true">
+          <button class="btn btn-primary" type="button">Choisir des fichiers</button>
+          <p class="drop-formats">JPG, JPEG, PNG · plusieurs fichiers acceptés</p>
+        </div>
+
+        <!-- Compress button -->
+        <button class="btn btn-primary btn-full hidden" id="convert-btn"
+                style="margin-top:1rem" type="button">
+          🗜️ Compresser les images
+        </button>
+
+        <!-- File list -->
+        <div class="file-list hidden" id="file-list"></div>
+
+        <!-- Progress -->
+        <div class="progress-wrap hidden" id="progress-wrap">
+          <div class="progress-text" id="progress-text">Compression en cours…</div>
+          <div class="progress-track">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- Stats globales -->
+        <div class="hidden" id="stats-container">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">📁 Poids original</div>
+              <div class="stat-value" id="stat-original">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">📦 Poids compressé</div>
+              <div class="stat-value" id="stat-converted">—</div>
+            </div>
+            <div class="stat-card stat-gain">
+              <div class="stat-label">💾 Gain total</div>
+              <div class="stat-value" id="stat-gain">—</div>
+            </div>
+            <div class="stat-card stat-gain">
+              <div class="stat-label">📉 Réduction</div>
+              <div class="stat-value" id="stat-pct">—</div>
+            </div>
+          </div>
+
+          <!-- ZIP button -->
+          <div class="zip-wrap hidden" id="zip-wrap">
+            <button class="btn btn-success btn-full" id="zip-btn" type="button">
+              ⬇ Télécharger toutes les images en ZIP
+            </button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-grid" id="results-container"></div>
+      </div>
+
+      <!-- Right: options -->
+      <aside class="options-panel">
+
+        <p style="font-size:.82rem;background:#f0eeff;border-radius:8px;padding:.65rem .9rem;margin-bottom:1.1rem;color:#555;line-height:1.5;">
+          Vous voulez réduire encore plus ?<br>
+          <a href="/" style="color:#6c63ff;font-weight:600;">Convertissez en WebP pour −90% →</a>
+        </p>
+
+        <h3>⚙️ Options de compression</h3>
+        <div class="option-group">
+          <div class="option-label">
+            <span>Qualité</span>
+            <span class="quality-val" id="quality-value">60</span>
+          </div>
+          <input type="range" id="quality-slider" class="slider"
+                 min="1" max="100" value="60" aria-label="Qualité de compression">
+          <div class="slider-hints">
+            <span>Léger</span>
+            <span>Équilibré</span>
+            <span>Qualité max</span>
+          </div>
+        </div>
+        <p class="option-hint">
+          <strong>60</strong> est idéal : bon compromis entre légèreté et qualité visuelle.
+          Descendez à <strong>40</strong> pour les miniatures, montez à <strong>85</strong>
+          pour des images haute qualité.
+        </p>
+        <p class="option-hint" style="margin-top:.6rem;font-size:.78rem;color:#aaa;">
+          PNG : format sans perte, le curseur affecte la vitesse de compression mais pas la qualité visuelle.
+        </p>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ──────────────────────────────────────────────────────────────── -->
+<section class="features">
+  <div class="container">
+    <h2 class="section-title">Pourquoi compresser vos images ?</h2>
+    <p class="section-sub">Des images plus légères = un site plus rapide = un meilleur référencement.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Jusqu'à 80% plus léger</h3>
+        <p>La compression JPG intelligente réduit le poids jusqu'à 80% sans perte de qualité visible à l'écran.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>SEO amélioré</h3>
+        <p>Google valorise la vitesse de chargement. Des images légères améliorent votre LCP et votre classement.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗂️</div>
+        <h3>Format conservé</h3>
+        <p>JPG reste JPG, PNG reste PNG. Pas de changement de format, transparence PNG parfaitement préservée.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Audit SEO ──────────────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="container" style="text-align:center;">
+    <h2>Votre site est-il optimisé pour Google ?</h2>
+    <p>Obtenez un audit SEO gratuit et personnalisé de votre site web</p>
+    <a href="/contact" class="btn btn-lg" style="background:white;color:#4F46E5;font-weight:700;">
+      Je veux mon audit gratuit →
+    </a>
+  </div>
+</section>
+
+<!-- ── Comment ça marche ─────────────────────────────────────────────────────── -->
+<section class="how-section">
+  <div class="container">
+    <h2 class="section-title">Compresser vos images en 3 clics</h2>
+    <p class="section-sub">Simple, rapide et 100&nbsp;% gratuit. Aucune installation requise.</p>
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="17 8 12 3 7 8" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="3" x2="12" y2="15" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Uploadez vos images</h3>
+        <p>Glissez-déposez vos fichiers JPG ou PNG dans la zone de dépôt. Upload multiple accepté.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" stroke="#6c63ff" stroke-width="2"/>
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Choisissez la qualité</h3>
+        <p>Réglez le niveau de compression entre 1 et 100. 60 est le réglage idéal pour le web.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="7 10 12 15 17 10" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="3" x2="12" y2="15" stroke="#6c63ff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Téléchargez</h3>
+        <p>Téléchargez chaque image compressée individuellement ou toutes en un seul fichier ZIP.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ────────────────────────────────────────────────────────────────────── -->
+<section class="faq-section">
+  <div class="container">
+    <h2 class="section-title">Questions fréquentes</h2>
+    <p class="section-sub">Tout ce que vous devez savoir sur la compression d'images.</p>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary class="faq-question">Quelle est la différence entre compression et conversion WebP ?</summary>
+        <div class="faq-answer">
+          <p>La compression réduit le poids de vos images en conservant le format d'origine (JPG reste JPG, PNG reste PNG).
+          La <a href="/" style="color:#6c63ff;">conversion en WebP</a> change le format et permet une réduction encore plus importante, jusqu'à 90%.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">La transparence PNG est-elle conservée ?</summary>
+        <div class="faq-answer"><p>Oui, les PNG avec transparence (canal alpha) conservent leur transparence après compression.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Mes images sont-elles stockées sur vos serveurs ?</summary>
+        <div class="faq-answer"><p>Non. Vos images sont traitées en mémoire et supprimées immédiatement. Nous ne conservons aucune donnée.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Quelle qualité choisir ?</summary>
+        <div class="faq-answer"><p>60 est idéal pour le web : la différence est imperceptible à l'écran. Descendez à 40 pour des miniatures ou des aperçus, montez à 80-85 pour des images imprimées ou haute fidélité.</p></div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Combien d'images puis-je compresser à la fois ?</summary>
+        <div class="faq-answer"><p>Autant que vous voulez. Le traitement est parallèle côté serveur.</p></div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SEO text ────────────────────────────────────────────────────────────────── -->
+<section class="seo-text-section">
+  <div class="container">
+    <div class="seo-inner">
+      <h2>Compresseur d'images JPG et PNG gratuit en ligne</h2>
+      <p>
+        ConvertWebP propose un compresseur d'images gratuit pour réduire le poids de vos fichiers JPG et PNG directement depuis votre navigateur, sans inscription et sans logiciel.
+        La compression est effectuée côté serveur en parallèle : vous gagnez du temps même sur des lots de dizaines d'images.
+        JPG reste JPG, PNG reste PNG. La transparence est parfaitement préservée.
+        Pour aller encore plus loin dans la réduction du poids, notre
+        <a href="/" style="color:#6c63ff;">convertisseur WebP</a>
+        permet de gagner jusqu'à 90% de poids en changeant de format.
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/compress.js" defer></script>
+{% endblock %}
