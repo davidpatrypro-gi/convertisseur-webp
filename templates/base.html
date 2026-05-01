@@ -79,69 +79,73 @@
       ConvertWebP
     </a>
 
-    <!-- Liens desktop + dropdown mobile -->
-    <ul class="nav-links" id="nav-links">
+    <!-- Liens desktop uniquement -->
+    <ul class="nav-links">
       <li><a href="/">Convertir en WebP</a></li>
       <li><a href="/compresser-images">Compresser des images</a></li>
       <li><a href="/blog">Blog SEO</a></li>
-      <!-- Visible uniquement dans le menu mobile -->
-      <li class="nav-mobile-cta">
-        <a href="/contact">Audit SEO Gratuit →</a>
-      </li>
     </ul>
 
-    <!-- CTA desktop (masqué sur mobile) -->
+    <!-- Bouton CTA desktop (masqué sur mobile par CSS) -->
     <a href="/contact" class="btn btn-primary btn-sm nav-desktop-cta">Audit SEO Gratuit</a>
 
-    <!-- Hamburger (mobile uniquement) -->
+    <!-- Hamburger — visible sur mobile uniquement -->
     <button class="nav-hamburger" id="nav-hamburger"
             aria-label="Ouvrir le menu" aria-expanded="false"
-            aria-controls="nav-links">
+            aria-controls="nav-mobile-menu">
       <span class="hamburger-bar"></span>
       <span class="hamburger-bar"></span>
       <span class="hamburger-bar"></span>
     </button>
   </nav>
-
-  <script>
-  (function () {
-    var btn   = document.getElementById('nav-hamburger');
-    var menu  = document.getElementById('nav-links');
-    if (!btn || !menu) return;
-
-    function open() {
-      btn.classList.add('open');
-      btn.setAttribute('aria-expanded', 'true');
-      menu.classList.add('open');
-    }
-    function close() {
-      btn.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      menu.classList.remove('open');
-    }
-
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      btn.classList.contains('open') ? close() : open();
-    });
-
-    /* Ferme au clic sur un lien (navigation) */
-    menu.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', close);
-    });
-
-    /* Ferme au clic en dehors du menu */
-    document.addEventListener('click', function (e) {
-      if (!menu.contains(e.target) && e.target !== btn) close();
-    });
-
-    /* Ferme sur Échap */
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') close();
-    });
-  })();
-  </script>
 </header>
+
+<!-- ── Menu mobile déroulant (séparé du nav desktop) ───────────────────────── -->
+<div class="nav-mobile-menu" id="nav-mobile-menu" role="navigation" aria-label="Menu mobile">
+  <a href="/">Convertir en WebP</a>
+  <a href="/compresser-images">Compresser des images</a>
+  <a href="/blog">Blog SEO</a>
+  <a href="/contact" class="nav-mobile-cta-btn">Audit SEO Gratuit →</a>
+</div>
+
+<script>
+(function () {
+  var btn  = document.getElementById('nav-hamburger');
+  var menu = document.getElementById('nav-mobile-menu');
+  if (!btn || !menu) return;
+
+  function openMenu() {
+    btn.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    menu.classList.add('open');
+  }
+  function closeMenu() {
+    btn.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+  }
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    btn.classList.contains('open') ? closeMenu() : openMenu();
+  });
+
+  /* Ferme au clic sur un lien */
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', closeMenu);
+  });
+
+  /* Ferme au clic en dehors */
+  document.addEventListener('click', function (e) {
+    if (!menu.contains(e.target) && e.target !== btn) closeMenu();
+  });
+
+  /* Ferme sur Échap */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMenu();
+  });
+})();
+</script>
 
 <!-- ── Bandeau Trustpilot ───────────────────────────────────────────────────── -->
 <style>
