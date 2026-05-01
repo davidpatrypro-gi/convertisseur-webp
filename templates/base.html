@@ -66,7 +66,7 @@
     gtag('config', 'G-89L3M1HS31');
   </script>
 
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css?v=2">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -100,12 +100,23 @@
   </nav>
 </header>
 
-<!-- ── Menu mobile déroulant (séparé du nav desktop) ───────────────────────── -->
-<div class="nav-mobile-menu" id="nav-mobile-menu" role="navigation" aria-label="Menu mobile">
-  <a href="/">Convertir en WebP</a>
-  <a href="/compresser-images">Compresser des images</a>
-  <a href="/blog">Blog SEO</a>
-  <a href="/contact" class="nav-mobile-cta-btn">Audit SEO Gratuit →</a>
+<!-- ── Menu mobile déroulant ────────────────────────────────────────────────── -->
+<!-- style="display:none" inline : caché dès le HTML, sans dépendre du CSS cache -->
+<div id="nav-mobile-menu" style="display:none;position:fixed;top:64px;left:0;right:0;
+     background:#fff;z-index:150;border-bottom:2px solid #e5e7eb;
+     box-shadow:0 8px 24px rgba(0,0,0,.12);padding:.5rem 0 1.25rem;"
+     role="navigation" aria-label="Menu mobile">
+  <a href="/" style="display:block;padding:.9rem 1.4rem;font-size:1rem;font-weight:500;
+     color:#1a1a2e;border-bottom:1px solid #e5e7eb;text-decoration:none;">Convertir en WebP</a>
+  <a href="/compresser-images" style="display:block;padding:.9rem 1.4rem;font-size:1rem;
+     font-weight:500;color:#1a1a2e;border-bottom:1px solid #e5e7eb;text-decoration:none;">Compresser des images</a>
+  <a href="/blog" style="display:block;padding:.9rem 1.4rem;font-size:1rem;font-weight:500;
+     color:#1a1a2e;border-bottom:1px solid #e5e7eb;text-decoration:none;">Blog SEO</a>
+  <div style="padding:1.1rem 1.4rem 0;">
+    <a href="/contact" style="display:block;text-align:center;padding:.8rem 1rem;
+       background:#6c63ff;color:#fff;border-radius:8px;font-weight:700;
+       text-decoration:none;">Audit SEO Gratuit →</a>
+  </div>
 </div>
 
 <script>
@@ -115,19 +126,19 @@
   if (!btn || !menu) return;
 
   function openMenu() {
+    menu.style.display = 'block';
     btn.classList.add('open');
     btn.setAttribute('aria-expanded', 'true');
-    menu.classList.add('open');
   }
   function closeMenu() {
+    menu.style.display = 'none';
     btn.classList.remove('open');
     btn.setAttribute('aria-expanded', 'false');
-    menu.classList.remove('open');
   }
 
   btn.addEventListener('click', function (e) {
     e.stopPropagation();
-    btn.classList.contains('open') ? closeMenu() : openMenu();
+    menu.style.display === 'none' ? openMenu() : closeMenu();
   });
 
   /* Ferme au clic sur un lien */
