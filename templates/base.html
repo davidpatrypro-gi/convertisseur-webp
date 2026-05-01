@@ -78,13 +78,69 @@
       <div class="nav-logo-icon">W</div>
       ConvertWebP
     </a>
-    <ul class="nav-links">
+
+    <!-- Liens desktop + dropdown mobile -->
+    <ul class="nav-links" id="nav-links">
       <li><a href="/">Convertir en WebP</a></li>
-      <li><a href="/compresser-images">Compresser</a></li>
+      <li><a href="/compresser-images">Compresser des images</a></li>
       <li><a href="/blog">Blog SEO</a></li>
+      <!-- Visible uniquement dans le menu mobile -->
+      <li class="nav-mobile-cta">
+        <a href="/contact">Audit SEO Gratuit →</a>
+      </li>
     </ul>
-    <a href="/contact" class="btn btn-primary btn-sm">Audit SEO Gratuit</a>
+
+    <!-- CTA desktop (masqué sur mobile) -->
+    <a href="/contact" class="btn btn-primary btn-sm nav-desktop-cta">Audit SEO Gratuit</a>
+
+    <!-- Hamburger (mobile uniquement) -->
+    <button class="nav-hamburger" id="nav-hamburger"
+            aria-label="Ouvrir le menu" aria-expanded="false"
+            aria-controls="nav-links">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
   </nav>
+
+  <script>
+  (function () {
+    var btn   = document.getElementById('nav-hamburger');
+    var menu  = document.getElementById('nav-links');
+    if (!btn || !menu) return;
+
+    function open() {
+      btn.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      menu.classList.add('open');
+    }
+    function close() {
+      btn.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      menu.classList.remove('open');
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      btn.classList.contains('open') ? close() : open();
+    });
+
+    /* Ferme au clic sur un lien (navigation) */
+    menu.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', close);
+    });
+
+    /* Ferme au clic en dehors du menu */
+    document.addEventListener('click', function (e) {
+      if (!menu.contains(e.target) && e.target !== btn) close();
+    });
+
+    /* Ferme sur Échap */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+  })();
+  </script>
 </header>
 
 <!-- ── Bandeau Trustpilot ───────────────────────────────────────────────────── -->
