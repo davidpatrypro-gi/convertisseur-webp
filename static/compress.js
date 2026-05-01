@@ -280,7 +280,7 @@ function triggerDownload(blob, filename) {
 }
 
 // ── Popup cross-tool (vers le convertisseur WebP) ────────────────────────────
-const CROSS_KEY      = 'cross_webp_v2';
+const CROSS_KEY      = 'cross_webp_v3';
 const CROSS_DELAY_MS = 3500;
 
 function scheduleCrossPopup() {
@@ -288,9 +288,15 @@ function scheduleCrossPopup() {
   setTimeout(showCrossPopup, CROSS_DELAY_MS);
 }
 
-function showCrossPopup() {
+// retries : si le popup TP est ouvert au moment où ce timer se déclenche,
+// on réessaie toutes les 4s (jusqu'à 5 fois) pour ne pas le rater.
+function showCrossPopup(retries = 5) {
   if (localStorage.getItem(CROSS_KEY)) return;
-  if (document.querySelector('.tp-overlay')) return; // un popup est déjà ouvert
+  if (document.querySelector('.tp-overlay')) {
+    // Un popup TP est ouvert — on attend qu'il se ferme, puis on réessaie
+    if (retries > 0) setTimeout(() => showCrossPopup(retries - 1), 4000);
+    return;
+  }
   const overlay = document.createElement('div');
   overlay.className = 'tp-overlay';
   overlay.setAttribute('role', 'dialog');
@@ -324,8 +330,8 @@ function closeCrossPopup(overlay) {
 
 // ── Popup Trustpilot ─────────────────────────────────────────────────────────
 const TP_URL         = 'https://fr.trustpilot.com/review/convertwebp.fr';
-const TP_LATER_KEY   = 'tp_later_v2';
-const TP_DONE_KEY    = 'tp_done_v2';
+const TP_LATER_KEY   = 'tp_later_v3';
+const TP_DONE_KEY    = 'tp_done_v3';
 const TP_DELAY_MS    = 1500;
 const TP_SNOOZE_DAYS = 7;
 

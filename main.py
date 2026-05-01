@@ -199,7 +199,8 @@ def _compress(content: bytes, filename: str, quality: int):
     if ext in ('jpg', 'jpeg'):
         if img.mode not in ('RGB', 'L'):
             img = img.convert('RGB')
-        img.save(buf, format='JPEG', quality=quality, optimize=True)
+        # optimize=False : on-the-fly single-pass, bien plus rapide (résultat quasi identique)
+        img.save(buf, format='JPEG', quality=quality, optimize=False, progressive=False)
         return buf.getvalue(), 'jpg', 'image/jpeg'
     elif ext == 'webp':
         if img.mode not in ('RGB', 'RGBA'):
@@ -209,12 +210,13 @@ def _compress(content: bytes, filename: str, quality: int):
     elif ext == 'png':  # PNG — format sans perte, transparence conservée
         if img.mode == 'P':
             img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
-        img.save(buf, format='PNG', optimize=True, compress_level=9)
+        # compress_level=6 : bon équilibre vitesse/taille (9 = max mais très lent)
+        img.save(buf, format='PNG', optimize=False, compress_level=6)
         return buf.getvalue(), 'png', 'image/png'
     else:  # Fallback : on compresse en JPEG
         if img.mode not in ('RGB', 'L'):
             img = img.convert('RGB')
-        img.save(buf, format='JPEG', quality=quality, optimize=True)
+        img.save(buf, format='JPEG', quality=quality, optimize=False, progressive=False)
         return buf.getvalue(), 'jpg', 'image/jpeg'
 
 
