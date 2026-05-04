@@ -295,6 +295,11 @@ async def blog_optimiser(request: Request):
     return templates.TemplateResponse(request, "blog/optimiser-images-vitesse-site-google.html")
 
 
+@app.get("/blog/compresser-images-en-ligne", response_class=HTMLResponse)
+async def blog_compresser_images(request: Request):
+    return templates.TemplateResponse(request, "blog/compresser-images-en-ligne.html")
+
+
 @app.get("/sitemap.xml")
 async def sitemap():
     content = open("static/sitemap.xml", "r", encoding="utf-8").read()
