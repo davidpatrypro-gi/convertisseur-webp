@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import gc
 import io
 import json
 import sqlite3
@@ -226,18 +227,10 @@ async def _compress_async(content: bytes, filename: str, quality: int):
     return await loop.run_in_executor(_executor, _compress, content, filename, quality)
 
 
-async def _zip_stream(entries: List[tuple]) -> AsyncGenerator[bytes, None]:
-    """Génère le ZIP en chunks de 64 Ko pour StreamingResponse."""
-    zip_buf = io.BytesIO()
-    with zipfile.ZipFile(
-        zip_buf, "w",
-        compression=zipfile.ZIP_DEFLATED,
-        compresslevel=1,
-    ) as zf:
-        for filename, data in entries:
-            zf.writestr(filename, data)
-    zip_buf.seek(0)
-    while chunk := zip_buf.read(65_536):
+async def _stream_buf(buf: io.BytesIO) -> AsyncGenerator[bytes, None]:
+    """Itère un BytesIO en chunks de 64 Ko pour StreamingResponse."""
+    buf.seek(0)
+    while chunk := buf.read(65_536):
         yield chunk
 
 
@@ -463,31 +456,43 @@ async def api_convert(
     files: List[UploadFile] = File(...),
     quality: int = Form(60),
 ):
-    # Lecture I/O en parallèle
-    contents = await asyncio.gather(*[f.read() for f in files])
+    if len(files) > 30:
+        raise HTTPException(
+            status_code=400,
+            detail="Maximum 30 images par conversion. Divisez votre lot en plusieurs envois.",
+        )
 
-    # Conversions CPU en parallèle dans le thread pool
-    webp_list = await asyncio.gather(
-        *[_to_webp_async(c, quality) for c in contents]
-    )
+    CHUNK      = 5
+    results    = []
+    total_orig = 0
+    total_conv = 0
 
-    total_orig = sum(len(c) for c in contents)
-    total_conv = sum(len(w) for w in webp_list)
+    for i in range(0, len(files), CHUNK):
+        chunk_files    = files[i : i + CHUNK]
+        # Lecture I/O du chunk uniquement
+        chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
+        # Conversion CPU du chunk dans le thread pool
+        chunk_webp     = await asyncio.gather(
+            *[_to_webp_async(c, quality) for c in chunk_contents]
+        )
+        for file, content, webp_bytes in zip(chunk_files, chunk_contents, chunk_webp):
+            total_orig += len(content)
+            total_conv += len(webp_bytes)
+            results.append({
+                "original_name":  file.filename,
+                "webp_name":      f"{file.filename.rsplit('.', 1)[0]}.webp",
+                "original_size":  len(content),
+                "converted_size": len(webp_bytes),
+                "webp_b64":       base64.b64encode(webp_bytes).decode(),
+            })
+        # Libération mémoire du chunk avant de passer au suivant
+        del chunk_contents, chunk_webp
+        gc.collect()
+
     await asyncio.get_running_loop().run_in_executor(
-        _executor, _record, len(contents), total_orig, total_conv, quality
+        _executor, _record, len(files), total_orig, total_conv, quality
     )
-
-    # original_b64 supprimé : le navigateur a déjà le fichier, inutile de le renvoyer
-    return [
-        {
-            "original_name": file.filename,
-            "webp_name": f"{file.filename.rsplit('.', 1)[0]}.webp",
-            "original_size": len(content),
-            "converted_size": len(webp_bytes),
-            "webp_b64": base64.b64encode(webp_bytes).decode(),
-        }
-        for file, content, webp_bytes in zip(files, contents, webp_list)
-    ]
+    return results
 
 
 @app.post("/api/convert-zip")
@@ -495,27 +500,38 @@ async def api_convert_zip(
     files: List[UploadFile] = File(...),
     quality: int = Form(60),
 ):
-    # Lecture I/O en parallèle
-    contents = await asyncio.gather(*[f.read() for f in files])
+    if len(files) > 30:
+        raise HTTPException(
+            status_code=400,
+            detail="Maximum 30 images par conversion. Divisez votre lot en plusieurs envois.",
+        )
 
-    # Conversions CPU en parallèle dans le thread pool
-    webp_list = await asyncio.gather(
-        *[_to_webp_async(c, quality) for c in contents]
-    )
+    CHUNK      = 5
+    total_orig = 0
+    total_conv = 0
+    zip_buf    = io.BytesIO()
 
-    total_orig = sum(len(c) for c in contents)
-    total_conv = sum(len(w) for w in webp_list)
+    with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
+        for i in range(0, len(files), CHUNK):
+            chunk_files    = files[i : i + CHUNK]
+            chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
+            chunk_webp     = await asyncio.gather(
+                *[_to_webp_async(c, quality) for c in chunk_contents]
+            )
+            for f, raw, wb in zip(chunk_files, chunk_contents, chunk_webp):
+                total_orig += len(raw)
+                total_conv += len(wb)
+                # Écriture immédiate dans le ZIP — libère wb après
+                zf.writestr(f"{f.filename.rsplit('.', 1)[0]}.webp", wb)
+                del wb
+            del chunk_contents, chunk_webp
+            gc.collect()
+
     await asyncio.get_running_loop().run_in_executor(
-        _executor, _record, len(contents), total_orig, total_conv, quality
+        _executor, _record, len(files), total_orig, total_conv, quality
     )
-
-    entries = [
-        (f"{f.filename.rsplit('.', 1)[0]}.webp", wb)
-        for f, wb in zip(files, webp_list)
-    ]
-
     return StreamingResponse(
-        _zip_stream(entries),
+        _stream_buf(zip_buf),
         media_type="application/zip",
         headers={"Content-Disposition": 'attachment; filename="images_webp.zip"'},
     )
@@ -526,21 +542,34 @@ async def api_compress(
     files: List[UploadFile] = File(...),
     quality: int = Form(60),
 ):
-    contents = await asyncio.gather(*[f.read() for f in files])
-    results  = await asyncio.gather(
-        *[_compress_async(c, f.filename, quality) for c, f in zip(contents, files)]
-    )
-    return [
-        {
-            "original_name":    file.filename,
-            "compressed_name":  f"compressed_{file.filename.rsplit('.', 1)[0]}.{ext}",
-            "original_size":    len(content),
-            "compressed_size":  len(compressed),
-            "compressed_b64":   base64.b64encode(compressed).decode(),
-            "mime":             mime,
-        }
-        for file, content, (compressed, ext, mime) in zip(files, contents, results)
-    ]
+    if len(files) > 30:
+        raise HTTPException(
+            status_code=400,
+            detail="Maximum 30 images par compression. Divisez votre lot en plusieurs envois.",
+        )
+
+    CHUNK   = 5
+    results = []
+
+    for i in range(0, len(files), CHUNK):
+        chunk_files    = files[i : i + CHUNK]
+        chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
+        chunk_results  = await asyncio.gather(
+            *[_compress_async(c, f.filename, quality) for c, f in zip(chunk_contents, chunk_files)]
+        )
+        for file, content, (compressed, ext, mime) in zip(chunk_files, chunk_contents, chunk_results):
+            results.append({
+                "original_name":   file.filename,
+                "compressed_name": f"compressed_{file.filename.rsplit('.', 1)[0]}.{ext}",
+                "original_size":   len(content),
+                "compressed_size": len(compressed),
+                "compressed_b64":  base64.b64encode(compressed).decode(),
+                "mime":            mime,
+            })
+        del chunk_contents, chunk_results
+        gc.collect()
+
+    return results
 
 
 @app.post("/api/compress-zip")
@@ -548,16 +577,30 @@ async def api_compress_zip(
     files: List[UploadFile] = File(...),
     quality: int = Form(60),
 ):
-    contents = await asyncio.gather(*[f.read() for f in files])
-    results  = await asyncio.gather(
-        *[_compress_async(c, f.filename, quality) for c, f in zip(contents, files)]
-    )
-    entries = [
-        (f"compressed_{f.filename.rsplit('.', 1)[0]}.{ext}", compressed)
-        for f, (compressed, ext, _mime) in zip(files, results)
-    ]
+    if len(files) > 30:
+        raise HTTPException(
+            status_code=400,
+            detail="Maximum 30 images par compression. Divisez votre lot en plusieurs envois.",
+        )
+
+    CHUNK   = 5
+    zip_buf = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
+        for i in range(0, len(files), CHUNK):
+            chunk_files    = files[i : i + CHUNK]
+            chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
+            chunk_results  = await asyncio.gather(
+                *[_compress_async(c, f.filename, quality) for c, f in zip(chunk_contents, chunk_files)]
+            )
+            for f, (compressed, ext, _mime) in zip(chunk_files, chunk_results):
+                zf.writestr(f"compressed_{f.filename.rsplit('.', 1)[0]}.{ext}", compressed)
+                del compressed
+            del chunk_contents, chunk_results
+            gc.collect()
+
     return StreamingResponse(
-        _zip_stream(entries),
+        _stream_buf(zip_buf),
         media_type="application/zip",
         headers={"Content-Disposition": 'attachment; filename="images_compressed.zip"'},
     )
