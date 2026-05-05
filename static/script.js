@@ -80,7 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── File handling ──────────────────────────────────────────────────────────────
 function isValidImage(file) {
-  return ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type);
+  // Vérification primaire : type MIME déclaré par le navigateur
+  if (['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) return true;
+  // Fallback : vérification par extension du nom de fichier.
+  // Nécessaire quand le navigateur retourne file.type="" (ex: certains fichiers
+  // dont le nom commence par "@", "#" ou d'autres caractères spéciaux).
+  const ext = file.name.split('.').pop().toLowerCase();
+  return ['jpg', 'jpeg', 'png'].includes(ext);
 }
 
 function handleFiles(files) {
@@ -159,7 +165,10 @@ async function convertAll() {
         convertedResults.push(result);
         renderResult(result, file);   // affichage immédiat, original depuis le navigateur
       })
-      .catch((err) => console.error('Erreur conversion', file.name, err))
+      .catch((err) => {
+        console.error('Erreur conversion', file.name, err);
+        renderConvertError(file.name);
+      })
       .finally(() => {
         done++;
         progressBar.style.width = Math.round((done / total) * 100) + '%';
@@ -243,6 +252,22 @@ function renderResult(r, originalFile) {
     scheduleTpPopup(r.original_size - r.converted_size);
   });
 
+  resultsContainer.appendChild(card);
+}
+
+function renderConvertError(filename) {
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.style.cssText =
+    'border-left:4px solid #ef4444;background:#fef2f2;padding:1rem 1.25rem;';
+  card.innerHTML = `
+    <div style="color:#b91c1c;font-weight:600;margin-bottom:.3rem;">
+      ⚠ Échec de conversion : ${escHtml(filename)}
+    </div>
+    <div style="font-size:.875rem;color:#6b7280;">
+      Ce fichier n'a pas pu être converti. Vérifiez qu'il s'agit bien d'une image JPG ou PNG valide
+      et réessayez. Si le problème persiste, renommez le fichier en supprimant les caractères spéciaux.
+    </div>`;
   resultsContainer.appendChild(card);
 }
 

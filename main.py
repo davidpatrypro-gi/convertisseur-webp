@@ -3,8 +3,11 @@ import base64
 import gc
 import io
 import json
+import re
 import sqlite3
+import unicodedata
 import zipfile
+from urllib.parse import unquote
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
@@ -150,6 +153,43 @@ except FileNotFoundError:
     pass
 
 
+# ── Filename helpers ───────────────────────────────────────────────────────────
+
+def _safe_stem(filename: str | None) -> str:
+    """Extrait et assainit le nom de base (sans extension) d'un fichier upload.
+
+    Gère tous les cas problématiques :
+      - filename None (python-multipart ne l'a pas trouvé)
+      - URL-encoding (%40 → @, %20 → espace, etc.)
+      - Caractères spéciaux : @, #, &, +, !, (, ), espaces
+      - Accents et caractères Unicode (é→e, ñ→n, …)
+      - Noms vides après nettoyage
+    """
+    if not filename:
+        return "image"
+    # Décode les % éventuels (%40 → @, %20 → espace, etc.)
+    filename = unquote(filename)
+    # Isole le nom de base (sans extension)
+    parts = filename.rsplit('.', 1)
+    stem = parts[0] if len(parts) > 1 else filename
+    if not stem:
+        return "image"
+    # Normalise les accents (é→e, ñ→n, …)
+    stem = unicodedata.normalize('NFKD', stem).encode('ascii', 'ignore').decode('ascii')
+    # Remplace tout caractère non alphanumérique (sauf tiret et underscore) par _
+    stem = re.sub(r'[^\w\-]', '_', stem)
+    # Écrase les séquences de séparateurs et supprime les extrémités
+    stem = re.sub(r'[_\-]{2,}', '_', stem).strip('_-')
+    return stem or "image"
+
+
+def _file_ext(filename: str | None) -> str:
+    """Retourne l'extension en minuscules, 'jpg' par défaut si absente ou None."""
+    if not filename or '.' not in filename:
+        return 'jpg'
+    return unquote(filename).rsplit('.', 1)[-1].lower()
+
+
 # ── Conversion helpers ─────────────────────────────────────────────────────────
 
 def _to_webp(content: bytes, quality: int) -> bytes:
@@ -184,10 +224,10 @@ async def _to_webp_async(content: bytes, quality: int) -> bytes:
     return await loop.run_in_executor(_executor, _to_webp, content, quality)
 
 
-def _compress(content: bytes, filename: str, quality: int):
+def _compress(content: bytes, filename: str | None, quality: int):
     """Compression synchrone dans le format d'origine (JPG→JPG, PNG→PNG).
     Retourne (compressed_bytes, out_extension, mime_type)."""
-    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'jpg'
+    ext = _file_ext(filename)
     img = Image.open(io.BytesIO(content))
 
     # Resize si > 5 Mo et dimension > 4000px (même règle que la conversion WebP)
@@ -479,8 +519,8 @@ async def api_convert(
             total_orig += len(content)
             total_conv += len(webp_bytes)
             results.append({
-                "original_name":  file.filename,
-                "webp_name":      f"{file.filename.rsplit('.', 1)[0]}.webp",
+                "original_name":  file.filename or "image",
+                "webp_name":      f"{_safe_stem(file.filename)}.webp",
                 "original_size":  len(content),
                 "converted_size": len(webp_bytes),
                 "webp_b64":       base64.b64encode(webp_bytes).decode(),
@@ -522,7 +562,7 @@ async def api_convert_zip(
                 total_orig += len(raw)
                 total_conv += len(wb)
                 # Écriture immédiate dans le ZIP — libère wb après
-                zf.writestr(f"{f.filename.rsplit('.', 1)[0]}.webp", wb)
+                zf.writestr(f"{_safe_stem(f.filename)}.webp", wb)
                 del wb
             del chunk_contents, chunk_webp
             gc.collect()
@@ -559,8 +599,8 @@ async def api_compress(
         )
         for file, content, (compressed, ext, mime) in zip(chunk_files, chunk_contents, chunk_results):
             results.append({
-                "original_name":   file.filename,
-                "compressed_name": f"compressed_{file.filename.rsplit('.', 1)[0]}.{ext}",
+                "original_name":   file.filename or "image",
+                "compressed_name": f"compressed_{_safe_stem(file.filename)}.{ext}",
                 "original_size":   len(content),
                 "compressed_size": len(compressed),
                 "compressed_b64":  base64.b64encode(compressed).decode(),
@@ -594,7 +634,7 @@ async def api_compress_zip(
                 *[_compress_async(c, f.filename, quality) for c, f in zip(chunk_contents, chunk_files)]
             )
             for f, (compressed, ext, _mime) in zip(chunk_files, chunk_results):
-                zf.writestr(f"compressed_{f.filename.rsplit('.', 1)[0]}.{ext}", compressed)
+                zf.writestr(f"compressed_{_safe_stem(f.filename)}.{ext}", compressed)
                 del compressed
             del chunk_contents, chunk_results
             gc.collect()

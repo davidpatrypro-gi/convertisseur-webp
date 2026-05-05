@@ -151,7 +151,10 @@ async function compressAll() {
         convertedResults.push(result);
         renderResult(result, file);
       })
-      .catch((err) => console.error('Erreur compression', file.name, err))
+      .catch((err) => {
+        console.error('Erreur compression', file.name, err);
+        renderCompressError(file.name);
+      })
       .finally(() => {
         done++;
         progressBar.style.width = Math.round((done / total) * 100) + '%';
@@ -180,6 +183,22 @@ async function compressAll() {
 }
 
 // ── Render results ─────────────────────────────────────────────────────────────
+function renderCompressError(filename) {
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.style.cssText =
+    'border-left:4px solid #ef4444;background:#fef2f2;padding:1rem 1.25rem;';
+  card.innerHTML = `
+    <div style="color:#b91c1c;font-weight:600;margin-bottom:.3rem;">
+      ⚠ Échec de compression : ${escHtml(filename)}
+    </div>
+    <div style="font-size:.875rem;color:#6b7280;">
+      Ce fichier n'a pas pu être compressé. Vérifiez qu'il s'agit bien d'une image valide
+      et réessayez. Si le problème persiste, renommez le fichier en supprimant les caractères spéciaux.
+    </div>`;
+  resultsContainer.appendChild(card);
+}
+
 function renderResult(r, originalFile) {
   const ratio    = ((1 - r.compressed_size / r.original_size) * 100).toFixed(1);
   const saving   = r.original_size - r.compressed_size;
