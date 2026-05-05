@@ -144,7 +144,20 @@ async function compressAll() {
 
     return fetch('/api/compress', { method: 'POST', body: fd })
       .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          const s = res.status;
+          let msg;
+          if (s === 502 || s === 503) {
+            msg = 'Le serveur est temporairement surchargé. Patientez 30 secondes et réessayez avec moins de fichiers à la fois.';
+          } else if (s === 413) {
+            msg = 'Fichier trop volumineux. Réduisez la taille ou utilisez le ZIP.';
+          } else if (s === 400) {
+            msg = 'Format non supporté. Vérifiez qu\'il s\'agit bien d\'une image valide.';
+          } else {
+            msg = `Erreur serveur (HTTP ${s}). Réessayez dans quelques instants.`;
+          }
+          throw new Error(msg);
+        }
         return res.json();
       })
       .then(([result]) => {

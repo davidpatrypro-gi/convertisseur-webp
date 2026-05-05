@@ -149,8 +149,10 @@ async def redirect_www(request: Request, call_next):
         return RedirectResponse(url=url, status_code=301)
     return await call_next(request)
 
-# Thread pool dédié aux conversions CPU-bound (borné pour Render free tier)
-_executor = ThreadPoolExecutor(max_workers=4)
+# Thread pool dédié aux conversions CPU-bound.
+# max_workers=2 : sur Render Free (512 Mo), limiter les threads réduit
+# la mémoire de pile (~8 Mo/thread sur Linux) et la pression mémoire globale.
+_executor = ThreadPoolExecutor(max_workers=2)
 
 # Largeur max des aperçus base64 renvoyés au client (réduit la RAM et la taille JSON)
 _PREVIEW_MAX_W = 800
@@ -261,35 +263,66 @@ async def _to_webp_async(content: bytes, quality: int) -> bytes:
     return await loop.run_in_executor(_executor, _to_webp, content, quality)
 
 
-def _make_preview_b64(webp_bytes: bytes) -> str:
-    """Crée un aperçu WebP ≤ _PREVIEW_MAX_W px et retourne son base64.
-    Réduit la taille du JSON et la RAM côté client. Ferme tous les objets Pillow."""
-    in_buf  = io.BytesIO(webp_bytes)
-    out_buf = io.BytesIO()
-    img     = None
+def _to_webp_with_thumb(content: bytes, quality: int) -> tuple[int, str]:
+    """Conversion WebP + aperçu 800px en un seul décodage Pillow.
+
+    Retourne (conv_size, preview_b64) :
+      - conv_size   : taille en octets du WebP pleine résolution (pour les stats)
+      - preview_b64 : aperçu ≤ 800px encodé en base64 (affiché ET téléchargé)
+
+    Avantage RAM critique vs l'ancienne approche en deux passes (_to_webp puis
+    _make_preview_b64) : l'image est décodée UNE seule fois, puis la miniature est
+    générée depuis l'objet Pillow déjà en mémoire → pic mémoire divisé par deux.
+    """
+    in_buf    = io.BytesIO(content)
+    full_buf  = io.BytesIO()
+    thumb_buf = io.BytesIO()
+    img = thumb = None
     try:
         img = Image.open(in_buf)
         img.load()
+
+        MAX_BYTES = 5 * 1024 * 1024
+        MAX_DIM   = 4000
+        if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
+            img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
+
+        # Normalisation colorimétrique — images intermédiaires fermées immédiatement
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            bg  = Image.new("RGB", img.size, (255, 255, 255))
+            src = img.convert("RGBA")
+            bg.paste(src, mask=src.split()[3])
+            src.close(); img.close(); img = bg
+        elif img.mode == "CMYK":
+            tmp = img.convert("RGB"); img.close(); img = tmp
+        elif img.mode not in ("RGB", "L"):
+            tmp = img.convert("RGB"); img.close(); img = tmp
+
+        # ① WebP pleine résolution → conv_size (bytes non conservés côté serveur)
+        img.save(full_buf, format="WebP", quality=quality, method=0)
+        conv_size = full_buf.tell()
+        full_buf.close(); full_buf = None   # libère immédiatement
+
+        # ② Aperçu ≤ 800px depuis le même objet Pillow déjà en mémoire
         if img.width > _PREVIEW_MAX_W:
             ratio = _PREVIEW_MAX_W / img.width
-            new_h = int(img.height * ratio)
-            tmp = img.resize((_PREVIEW_MAX_W, new_h), Image.BILINEAR)
-            img.close()
-            img = tmp
-        if img.mode not in ("RGB", "RGBA", "L"):
-            tmp = img.convert("RGB")
-            img.close()
-            img = tmp
-        img.save(out_buf, format="WebP", quality=72, method=0)
-        return base64.b64encode(out_buf.getvalue()).decode()
+            thumb = img.resize((_PREVIEW_MAX_W, int(img.height * ratio)), Image.BILINEAR)
+            thumb.save(thumb_buf, format="WebP", quality=72, method=0)
+            thumb.close(); thumb = None
+        else:
+            img.save(thumb_buf, format="WebP", quality=72, method=0)
+
+        return conv_size, base64.b64encode(thumb_buf.getvalue()).decode()
     finally:
-        if img is not None:
-            try:
-                img.close()
-            except Exception:
-                pass
+        for obj in (thumb, img):
+            if obj is not None:
+                try: obj.close()
+                except Exception: pass
         in_buf.close()
-        out_buf.close()
+        if full_buf is not None:
+            try: full_buf.close()
+            except Exception: pass
+        thumb_buf.close()
 
 
 def _compress(content: bytes, filename: str | None, quality: int):
@@ -605,16 +638,13 @@ async def api_convert(
         content = await file.read()
         stem    = _safe_stem(file.filename)
         try:
-            webp_result = await _to_webp_async(content, quality)
+            # Un seul appel thread pool = un seul décodage Pillow (conversion + aperçu)
+            conv_size, preview_b64 = await loop.run_in_executor(
+                _executor, _to_webp_with_thumb, content, quality
+            )
             orig_size   = len(content)
-            conv_size   = len(webp_result)
             total_orig += orig_size
             total_conv += conv_size
-            # Aperçu réduit (≤ 800px) : économise RAM côté serveur ET client
-            preview_b64 = await loop.run_in_executor(
-                _executor, _make_preview_b64, webp_result
-            )
-            del webp_result  # libère les bytes WebP pleine résolution immédiatement
             results.append({
                 "original_name":  file.filename or "image",
                 "webp_name":      f"{stem}.webp",
