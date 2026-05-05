@@ -9,6 +9,13 @@ import unicodedata
 import zipfile
 from urllib.parse import unquote
 from concurrent.futures import ThreadPoolExecutor
+
+try:
+    import psutil as _psutil
+    _HAS_PSUTIL = True
+except ImportError:
+    _HAS_PSUTIL = False
+
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 from typing import AsyncGenerator, List
@@ -145,6 +152,17 @@ async def redirect_www(request: Request, call_next):
 # Thread pool dédié aux conversions CPU-bound (borné pour Render free tier)
 _executor = ThreadPoolExecutor(max_workers=4)
 
+# Largeur max des aperçus base64 renvoyés au client (réduit la RAM et la taille JSON)
+_PREVIEW_MAX_W = 800
+
+
+def _log_mem(label: str) -> None:
+    """Log la consommation RAM du process si psutil est installé."""
+    if not _HAS_PSUTIL:
+        return
+    rss_mb = _psutil.Process().memory_info().rss / 1_048_576
+    print(f"[MEM] {label} : {rss_mb:.1f} MB RSS", flush=True)
+
 # Favicon mis en cache en mémoire au démarrage
 _FAVICON: bytes = b""
 try:
@@ -193,29 +211,48 @@ def _file_ext(filename: str | None) -> str:
 # ── Conversion helpers ─────────────────────────────────────────────────────────
 
 def _to_webp(content: bytes, quality: int) -> bytes:
-    """Conversion synchrone — exécutée dans le thread pool."""
-    img = Image.open(io.BytesIO(content))
+    """Conversion synchrone vers WebP — exécutée dans le thread pool.
+    Tous les objets Pillow et BytesIO sont fermés explicitement en sortie."""
+    in_buf  = io.BytesIO(content)
+    out_buf = io.BytesIO()
+    img     = None
+    try:
+        img = Image.open(in_buf)
+        img.load()  # Force le décodage complet — attrape fichiers tronqués / CMYK / etc.
 
-    # Resize uniquement si le fichier dépasse 5 Mo ET que la résolution dépasse 4000px
-    # Garde les proportions, accélère drastiquement la conversion sans perte visible
-    MAX_BYTES = 5 * 1024 * 1024   # 5 Mo
-    MAX_DIM   = 4000
-    if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
-        img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
+        # Resize uniquement si le fichier dépasse 5 Mo ET que la résolution dépasse 4000px
+        MAX_BYTES = 5 * 1024 * 1024
+        MAX_DIM   = 4000
+        if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
+            img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
-    # Gestion de la transparence
-    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-        bg = Image.new("RGB", img.size, (255, 255, 255))
-        src = img.convert("RGBA")
-        bg.paste(src, mask=src.split()[3])
-        img = bg
-    elif img.mode != "RGB":
-        img = img.convert("RGB")
+        # Normalisation du mode colorimétrique → RGB (fermeture immédiate des images intermédiaires)
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            bg  = Image.new("RGB", img.size, (255, 255, 255))
+            src = img.convert("RGBA")
+            bg.paste(src, mask=src.split()[3])
+            src.close()
+            img.close()
+            img = bg
+        elif img.mode == "CMYK":
+            tmp = img.convert("RGB")
+            img.close()
+            img = tmp
+        elif img.mode not in ("RGB", "L"):
+            tmp = img.convert("RGB")
+            img.close()
+            img = tmp
 
-    buf = io.BytesIO()
-    # method=0 : encodage le plus rapide, qualité suffisante pour le web
-    img.save(buf, format="WebP", quality=quality, method=0)
-    return buf.getvalue()
+        img.save(out_buf, format="WebP", quality=quality, method=0)
+        return out_buf.getvalue()
+    finally:
+        if img is not None:
+            try:
+                img.close()
+            except Exception:
+                pass
+        in_buf.close()
+        out_buf.close()
 
 
 async def _to_webp_async(content: bytes, quality: int) -> bytes:
@@ -224,41 +261,95 @@ async def _to_webp_async(content: bytes, quality: int) -> bytes:
     return await loop.run_in_executor(_executor, _to_webp, content, quality)
 
 
+def _make_preview_b64(webp_bytes: bytes) -> str:
+    """Crée un aperçu WebP ≤ _PREVIEW_MAX_W px et retourne son base64.
+    Réduit la taille du JSON et la RAM côté client. Ferme tous les objets Pillow."""
+    in_buf  = io.BytesIO(webp_bytes)
+    out_buf = io.BytesIO()
+    img     = None
+    try:
+        img = Image.open(in_buf)
+        img.load()
+        if img.width > _PREVIEW_MAX_W:
+            ratio = _PREVIEW_MAX_W / img.width
+            new_h = int(img.height * ratio)
+            tmp = img.resize((_PREVIEW_MAX_W, new_h), Image.BILINEAR)
+            img.close()
+            img = tmp
+        if img.mode not in ("RGB", "RGBA", "L"):
+            tmp = img.convert("RGB")
+            img.close()
+            img = tmp
+        img.save(out_buf, format="WebP", quality=72, method=0)
+        return base64.b64encode(out_buf.getvalue()).decode()
+    finally:
+        if img is not None:
+            try:
+                img.close()
+            except Exception:
+                pass
+        in_buf.close()
+        out_buf.close()
+
+
 def _compress(content: bytes, filename: str | None, quality: int):
     """Compression synchrone dans le format d'origine (JPG→JPG, PNG→PNG).
-    Retourne (compressed_bytes, out_extension, mime_type)."""
-    ext = _file_ext(filename)
-    img = Image.open(io.BytesIO(content))
+    Retourne (compressed_bytes, out_extension, mime_type).
+    Tous les objets Pillow et BytesIO sont fermés explicitement en sortie."""
+    ext     = _file_ext(filename)
+    in_buf  = io.BytesIO(content)
+    out_buf = io.BytesIO()
+    img     = None
+    try:
+        img = Image.open(in_buf)
+        img.load()  # Force le décodage complet — même raison que dans _to_webp
 
-    # Resize si > 5 Mo et dimension > 4000px (même règle que la conversion WebP)
-    MAX_BYTES = 5 * 1024 * 1024
-    MAX_DIM   = 4000
-    if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
-        img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
+        # Resize si > 5 Mo et dimension > 4000px (même règle que la conversion WebP)
+        MAX_BYTES = 5 * 1024 * 1024
+        MAX_DIM   = 4000
+        if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
+            img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
-    buf = io.BytesIO()
-    if ext in ('jpg', 'jpeg'):
-        if img.mode not in ('RGB', 'L'):
-            img = img.convert('RGB')
-        # optimize=False : on-the-fly single-pass, bien plus rapide (résultat quasi identique)
-        img.save(buf, format='JPEG', quality=quality, optimize=False, progressive=False)
-        return buf.getvalue(), 'jpg', 'image/jpeg'
-    elif ext == 'webp':
-        if img.mode not in ('RGB', 'RGBA'):
-            img = img.convert('RGBA' if img.mode in ('LA', 'PA', 'P') else 'RGB')
-        img.save(buf, format='WebP', quality=quality, method=0)
-        return buf.getvalue(), 'webp', 'image/webp'
-    elif ext == 'png':  # PNG — format sans perte, transparence conservée
-        if img.mode == 'P':
-            img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
-        # compress_level=6 : bon équilibre vitesse/taille (9 = max mais très lent)
-        img.save(buf, format='PNG', optimize=False, compress_level=6)
-        return buf.getvalue(), 'png', 'image/png'
-    else:  # Fallback : on compresse en JPEG
-        if img.mode not in ('RGB', 'L'):
-            img = img.convert('RGB')
-        img.save(buf, format='JPEG', quality=quality, optimize=False, progressive=False)
-        return buf.getvalue(), 'jpg', 'image/jpeg'
+        if ext in ('jpg', 'jpeg'):
+            if img.mode not in ('RGB', 'L'):
+                tmp = img.convert('RGB')
+                img.close()
+                img = tmp
+            # optimize=False : on-the-fly single-pass, bien plus rapide
+            img.save(out_buf, format='JPEG', quality=quality, optimize=False, progressive=False)
+            return out_buf.getvalue(), 'jpg', 'image/jpeg'
+        elif ext == 'webp':
+            if img.mode not in ('RGB', 'RGBA'):
+                mode = 'RGBA' if img.mode in ('LA', 'PA', 'P') else 'RGB'
+                tmp = img.convert(mode)
+                img.close()
+                img = tmp
+            img.save(out_buf, format='WebP', quality=quality, method=0)
+            return out_buf.getvalue(), 'webp', 'image/webp'
+        elif ext == 'png':  # PNG — format sans perte, transparence conservée
+            if img.mode == 'P':
+                mode = 'RGBA' if 'transparency' in img.info else 'RGB'
+                tmp = img.convert(mode)
+                img.close()
+                img = tmp
+            # compress_level=6 : bon équilibre vitesse/taille
+            img.save(out_buf, format='PNG', optimize=False, compress_level=6)
+            return out_buf.getvalue(), 'png', 'image/png'
+        else:  # Fallback : on compresse en JPEG
+            if img.mode not in ('RGB', 'L'):
+                tmp = img.convert('RGB')
+                img.close()
+                img = tmp
+            img.save(out_buf, format='JPEG', quality=quality, optimize=False, progressive=False)
+            return out_buf.getvalue(), 'jpg', 'image/jpeg'
+    finally:
+        if img is not None:
+            try:
+                img.close()
+            except Exception:
+                pass
+        in_buf.close()
+        out_buf.close()
 
 
 async def _compress_async(content: bytes, filename: str, quality: int):
@@ -502,36 +593,52 @@ async def api_convert(
             detail="Maximum 30 images par conversion. Divisez votre lot en plusieurs envois.",
         )
 
-    CHUNK      = 5
     results    = []
     total_orig = 0
     total_conv = 0
+    loop       = asyncio.get_running_loop()
+    _log_mem("convert début")
 
-    for i in range(0, len(files), CHUNK):
-        chunk_files    = files[i : i + CHUNK]
-        # Lecture I/O du chunk uniquement
-        chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
-        # Conversion CPU du chunk dans le thread pool
-        chunk_webp     = await asyncio.gather(
-            *[_to_webp_async(c, quality) for c in chunk_contents]
-        )
-        for file, content, webp_bytes in zip(chunk_files, chunk_contents, chunk_webp):
-            total_orig += len(content)
-            total_conv += len(webp_bytes)
+    # Traitement séquentiel image par image : garantit qu'une seule image Pillow
+    # est en mémoire à la fois — évite les OOM sur le plan Free de Render (512 Mo).
+    for file in files:
+        content = await file.read()
+        stem    = _safe_stem(file.filename)
+        try:
+            webp_result = await _to_webp_async(content, quality)
+            orig_size   = len(content)
+            conv_size   = len(webp_result)
+            total_orig += orig_size
+            total_conv += conv_size
+            # Aperçu réduit (≤ 800px) : économise RAM côté serveur ET client
+            preview_b64 = await loop.run_in_executor(
+                _executor, _make_preview_b64, webp_result
+            )
+            del webp_result  # libère les bytes WebP pleine résolution immédiatement
             results.append({
                 "original_name":  file.filename or "image",
-                "webp_name":      f"{_safe_stem(file.filename)}.webp",
-                "original_size":  len(content),
-                "converted_size": len(webp_bytes),
-                "webp_b64":       base64.b64encode(webp_bytes).decode(),
+                "webp_name":      f"{stem}.webp",
+                "original_size":  orig_size,
+                "converted_size": conv_size,
+                "webp_b64":       preview_b64,
             })
-        # Libération mémoire du chunk avant de passer au suivant
-        del chunk_contents, chunk_webp
-        gc.collect()
+        except Exception as exc:
+            print(f"[WARN] Conversion échouée {file.filename!r}: {exc}", flush=True)
+            results.append({
+                "original_name":  file.filename or "image",
+                "webp_name":      f"{stem}.webp",
+                "original_size":  len(content),
+                "converted_size": 0,
+                "webp_b64":       None,
+                "error":          f"{type(exc).__name__}: {exc}",
+            })
+        finally:
+            del content
+            gc.collect()
+        _log_mem(f"convert après {file.filename!r}")
 
-    await asyncio.get_running_loop().run_in_executor(
-        _executor, _record, len(files), total_orig, total_conv, quality
-    )
+    await loop.run_in_executor(_executor, _record, len(files), total_orig, total_conv, quality)
+    _log_mem("convert fin")
     return results
 
 
@@ -546,30 +653,30 @@ async def api_convert_zip(
             detail="Maximum 30 images par conversion. Divisez votre lot en plusieurs envois.",
         )
 
-    CHUNK      = 5
     total_orig = 0
     total_conv = 0
     zip_buf    = io.BytesIO()
+    loop       = asyncio.get_running_loop()
+    _log_mem("convert-zip début")
 
     with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
-        for i in range(0, len(files), CHUNK):
-            chunk_files    = files[i : i + CHUNK]
-            chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
-            chunk_webp     = await asyncio.gather(
-                *[_to_webp_async(c, quality) for c in chunk_contents]
-            )
-            for f, raw, wb in zip(chunk_files, chunk_contents, chunk_webp):
-                total_orig += len(raw)
-                total_conv += len(wb)
-                # Écriture immédiate dans le ZIP — libère wb après
-                zf.writestr(f"{_safe_stem(f.filename)}.webp", wb)
-                del wb
-            del chunk_contents, chunk_webp
-            gc.collect()
+        for file in files:
+            content = await file.read()
+            try:
+                webp_result = await _to_webp_async(content, quality)
+                total_orig += len(content)
+                total_conv += len(webp_result)
+                zf.writestr(f"{_safe_stem(file.filename)}.webp", webp_result)
+                del webp_result
+            except Exception as exc:
+                print(f"[WARN] ZIP convert skip {file.filename!r}: {exc}", flush=True)
+            finally:
+                del content
+                gc.collect()
+            _log_mem(f"convert-zip après {file.filename!r}")
 
-    await asyncio.get_running_loop().run_in_executor(
-        _executor, _record, len(files), total_orig, total_conv, quality
-    )
+    await loop.run_in_executor(_executor, _record, len(files), total_orig, total_conv, quality)
+    _log_mem("convert-zip fin")
     return StreamingResponse(
         _stream_buf(zip_buf),
         media_type="application/zip",
@@ -588,27 +695,44 @@ async def api_compress(
             detail="Maximum 30 images par compression. Divisez votre lot en plusieurs envois.",
         )
 
-    CHUNK   = 5
     results = []
+    loop    = asyncio.get_running_loop()
+    _log_mem("compress début")
 
-    for i in range(0, len(files), CHUNK):
-        chunk_files    = files[i : i + CHUNK]
-        chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
-        chunk_results  = await asyncio.gather(
-            *[_compress_async(c, f.filename, quality) for c, f in zip(chunk_contents, chunk_files)]
-        )
-        for file, content, (compressed, ext, mime) in zip(chunk_files, chunk_contents, chunk_results):
+    for file in files:
+        content = await file.read()
+        stem    = _safe_stem(file.filename)
+        try:
+            comp_result          = await _compress_async(content, file.filename, quality)
+            compressed, ext, mime = comp_result
+            comp_size            = len(compressed)
+            comp_b64             = base64.b64encode(compressed).decode()
+            del compressed  # libère immédiatement les bytes compressés
             results.append({
                 "original_name":   file.filename or "image",
-                "compressed_name": f"compressed_{_safe_stem(file.filename)}.{ext}",
+                "compressed_name": f"compressed_{stem}.{ext}",
                 "original_size":   len(content),
-                "compressed_size": len(compressed),
-                "compressed_b64":  base64.b64encode(compressed).decode(),
+                "compressed_size": comp_size,
+                "compressed_b64":  comp_b64,
                 "mime":            mime,
             })
-        del chunk_contents, chunk_results
-        gc.collect()
+        except Exception as exc:
+            print(f"[WARN] Compression échouée {file.filename!r}: {exc}", flush=True)
+            results.append({
+                "original_name":   file.filename or "image",
+                "compressed_name": f"compressed_{stem}.jpg",
+                "original_size":   len(content),
+                "compressed_size": 0,
+                "compressed_b64":  None,
+                "mime":            "image/jpeg",
+                "error":           f"{type(exc).__name__}: {exc}",
+            })
+        finally:
+            del content
+            gc.collect()
+        _log_mem(f"compress après {file.filename!r}")
 
+    _log_mem("compress fin")
     return results
 
 
@@ -623,22 +747,25 @@ async def api_compress_zip(
             detail="Maximum 30 images par compression. Divisez votre lot en plusieurs envois.",
         )
 
-    CHUNK   = 5
     zip_buf = io.BytesIO()
+    _log_mem("compress-zip début")
 
     with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
-        for i in range(0, len(files), CHUNK):
-            chunk_files    = files[i : i + CHUNK]
-            chunk_contents = await asyncio.gather(*[f.read() for f in chunk_files])
-            chunk_results  = await asyncio.gather(
-                *[_compress_async(c, f.filename, quality) for c, f in zip(chunk_contents, chunk_files)]
-            )
-            for f, (compressed, ext, _mime) in zip(chunk_files, chunk_results):
-                zf.writestr(f"compressed_{_safe_stem(f.filename)}.{ext}", compressed)
+        for file in files:
+            content = await file.read()
+            try:
+                comp_result          = await _compress_async(content, file.filename, quality)
+                compressed, ext, _   = comp_result
+                zf.writestr(f"compressed_{_safe_stem(file.filename)}.{ext}", compressed)
                 del compressed
-            del chunk_contents, chunk_results
-            gc.collect()
+            except Exception as exc:
+                print(f"[WARN] ZIP compress skip {file.filename!r}: {exc}", flush=True)
+            finally:
+                del content
+                gc.collect()
+            _log_mem(f"compress-zip après {file.filename!r}")
 
+    _log_mem("compress-zip fin")
     return StreamingResponse(
         _stream_buf(zip_buf),
         media_type="application/zip",

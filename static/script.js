@@ -162,12 +162,20 @@ async function convertAll() {
         return res.json();
       })
       .then(([result]) => {
+        if (result.error) {
+          // Le serveur a converti la requête mais ce fichier précis a échoué
+          // (ex: JPEG corrompu, encodage non standard, mode colorimétrique CMYK…)
+          console.warn('Conversion échouée côté serveur', file.name, result.error);
+          renderConvertError(file.name, result.error);
+          return;
+        }
         convertedResults.push(result);
-        renderResult(result, file);   // affichage immédiat, original depuis le navigateur
+        renderResult(result, file);
       })
       .catch((err) => {
+        // Erreur réseau ou HTTP non-ok (4xx/5xx non gérés)
         console.error('Erreur conversion', file.name, err);
-        renderConvertError(file.name);
+        renderConvertError(file.name, err.message);
       })
       .finally(() => {
         done++;
@@ -255,19 +263,22 @@ function renderResult(r, originalFile) {
   resultsContainer.appendChild(card);
 }
 
-function renderConvertError(filename) {
+function renderConvertError(filename, detail) {
   const card = document.createElement('div');
   card.className = 'result-card';
   card.style.cssText =
     'border-left:4px solid #ef4444;background:#fef2f2;padding:1rem 1.25rem;';
+  const detailHtml = detail
+    ? `<div style="font-size:.8rem;color:#9ca3af;margin-top:.25rem;font-family:monospace">${escHtml(detail)}</div>`
+    : '';
   card.innerHTML = `
     <div style="color:#b91c1c;font-weight:600;margin-bottom:.3rem;">
       ⚠ Échec de conversion : ${escHtml(filename)}
     </div>
     <div style="font-size:.875rem;color:#6b7280;">
-      Ce fichier n'a pas pu être converti. Vérifiez qu'il s'agit bien d'une image JPG ou PNG valide
-      et réessayez. Si le problème persiste, renommez le fichier en supprimant les caractères spéciaux.
-    </div>`;
+      Ce fichier n'a pas pu être converti. Vérifiez qu'il s'agit bien d'une image JPG ou PNG valide.
+    </div>
+    ${detailHtml}`;
   resultsContainer.appendChild(card);
 }
 
