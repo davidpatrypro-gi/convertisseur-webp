@@ -150,9 +150,11 @@ async def redirect_www(request: Request, call_next):
     return await call_next(request)
 
 # Thread pool dédié aux conversions CPU-bound.
-# max_workers=2 : sur Render Free (512 Mo), limiter les threads réduit
-# la mémoire de pile (~8 Mo/thread sur Linux) et la pression mémoire globale.
-_executor = ThreadPoolExecutor(max_workers=2)
+# max_workers=1 : un seul thread Pillow actif à la fois, toutes requêtes confondues.
+# Le client envoie un POST par fichier en parallèle ; avec max_workers=2 on pouvait
+# décoder simultanément 2 images → pic mémoire doublé → OOM sur Render Free (512 Mo).
+# max_workers=1 sérialise tous les décodages, élimine ce risque.
+_executor = ThreadPoolExecutor(max_workers=1)
 
 # Largeur max des aperçus base64 renvoyés au client (réduit la RAM et la taille JSON)
 _PREVIEW_MAX_W  = 800
@@ -255,7 +257,9 @@ def _to_webp(content: bytes, quality: int) -> bytes:
             img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
         img = _normalize_mode(img)
-        img.save(out_buf, format="WebP", quality=quality, method=0)
+        # method=4 : encodeur WebP équilibré (vitesse/taux de compression).
+        # method=0 donnait 1-4 % de réduction seulement ; method=4 atteint 20-40 %.
+        img.save(out_buf, format="WebP", quality=quality, method=4)
         return out_buf.getvalue()
     finally:
         if img is not None:
@@ -300,7 +304,7 @@ def _to_webp_with_thumb(content: bytes, quality: int) -> tuple[int, str]:
         img = _normalize_mode(img)
 
         # ① WebP pleine résolution → conv_size (bytes non conservés côté serveur)
-        img.save(full_buf, format="WebP", quality=quality, method=0)
+        img.save(full_buf, format="WebP", quality=quality, method=4)
         conv_size = full_buf.tell()
         full_buf.close(); full_buf = None   # libère immédiatement
 
@@ -308,10 +312,10 @@ def _to_webp_with_thumb(content: bytes, quality: int) -> tuple[int, str]:
         if img.width > _PREVIEW_MAX_W:
             ratio = _PREVIEW_MAX_W / img.width
             thumb = img.resize((_PREVIEW_MAX_W, int(img.height * ratio)), Image.BILINEAR)
-            thumb.save(thumb_buf, format="WebP", quality=72, method=0)
+            thumb.save(thumb_buf, format="WebP", quality=72, method=4)
             thumb.close(); thumb = None
         else:
-            img.save(thumb_buf, format="WebP", quality=72, method=0)
+            img.save(thumb_buf, format="WebP", quality=72, method=4)
 
         return conv_size, base64.b64encode(thumb_buf.getvalue()).decode()
     finally:
@@ -358,7 +362,7 @@ def _compress(content: bytes, filename: str | None, quality: int):
                 tmp = img.convert(mode)
                 img.close()
                 img = tmp
-            img.save(out_buf, format='WebP', quality=quality, method=0)
+            img.save(out_buf, format='WebP', quality=quality, method=4)
             return out_buf.getvalue(), 'webp', 'image/webp'
         elif ext == 'png':  # PNG — format sans perte, transparence conservée
             if img.mode == 'P':
@@ -651,11 +655,14 @@ async def api_convert(
             })
             del content; gc.collect(); continue
         try:
-            # Un seul appel thread pool = un seul décodage Pillow (conversion + aperçu)
-            conv_size, preview_b64 = await loop.run_in_executor(
-                _executor, _to_webp_with_thumb, content, quality
-            )
+            # Conversion pleine résolution — téléchargé ET affiché tel quel.
+            # On ne génère plus de miniature 800 px : la taille affichée dans les stats
+            # correspond exactement au fichier téléchargé, éliminant le bug "1-4 %".
+            webp_bytes  = await loop.run_in_executor(_executor, _to_webp, content, quality)
             orig_size   = len(content)
+            conv_size   = len(webp_bytes)
+            preview_b64 = base64.b64encode(webp_bytes).decode()
+            del webp_bytes
             total_orig += orig_size
             total_conv += conv_size
             results.append({
