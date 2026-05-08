@@ -355,17 +355,18 @@ def _compress(content: bytes, filename: str | None, quality: int):
                 img = tmp
             # optimize=False : on-the-fly single-pass, bien plus rapide
             img.save(out_buf, format='JPEG', quality=quality, optimize=False, progressive=False)
-            return out_buf.getvalue(), 'jpg', 'image/jpeg'
+            compressed = out_buf.getvalue()
         elif ext == 'webp':
             if img.mode not in ('RGB', 'RGBA'):
                 mode = 'RGBA' if img.mode in ('LA', 'PA', 'P') else 'RGB'
                 tmp = img.convert(mode)
                 img.close()
                 img = tmp
-            # method=2 : bon compromis vitesse/compression pour une recompression
-            # (method=4 est réservé à la conversion WebP où la qualité prime)
-            img.save(out_buf, format='WebP', quality=quality, method=2)
-            return out_buf.getvalue(), 'webp', 'image/webp'
+            # method=4 : même niveau que la conversion — nécessaire pour ne pas
+            # produire un fichier plus lourd que l'original (method=2 était insuffisant
+            # face à des WebP déjà encodés à method=4).
+            img.save(out_buf, format='WebP', quality=quality, method=4)
+            compressed = out_buf.getvalue()
         elif ext == 'png':  # PNG — format sans perte, transparence conservée
             if img.mode == 'P':
                 mode = 'RGBA' if 'transparency' in img.info else 'RGB'
@@ -376,13 +377,20 @@ def _compress(content: bytes, filename: str | None, quality: int):
             # Pour des images web c'est le bon équilibre — on compresse pour le poids,
             # pas pour atteindre le maximum théorique zlib.
             img.save(out_buf, format='PNG', optimize=False, compress_level=1)
-            return out_buf.getvalue(), 'png', 'image/png'
+            compressed = out_buf.getvalue()
         else:
             # Format non supporté (GIF, BMP, TIFF, AVIF…) — on refuse explicitement
             # plutôt que de convertir silencieusement en JPEG sans prévenir l'utilisateur.
             raise ValueError(
                 f"Format '{ext}' non supporté. Utilisez JPG, PNG ou WebP."
             )
+
+        # Règle "jamais plus lourd que l'original" : si la compression produit un
+        # fichier plus grand (ex: WebP déjà optimisé recompressé à qualité inférieure),
+        # on retourne le fichier original intact plutôt que d'aggraver les choses.
+        if len(compressed) >= len(content):
+            return content, ext, f'image/{ext.replace("jpg", "jpeg")}', True
+        return compressed, ext, f'image/{ext.replace("jpg", "jpeg")}', False
     finally:
         if img is not None:
             try:
@@ -771,11 +779,11 @@ async def api_compress(
             })
             del content; gc.collect(); continue
         try:
-            comp_result          = await _compress_async(content, file.filename, quality)
-            compressed, ext, mime = comp_result
-            comp_size            = len(compressed)
-            comp_b64             = base64.b64encode(compressed).decode()
-            del compressed  # libère immédiatement les bytes compressés
+            comp_result               = await _compress_async(content, file.filename, quality)
+            compressed, ext, mime, skipped = comp_result
+            comp_size                 = len(compressed)
+            comp_b64                  = base64.b64encode(compressed).decode()
+            del compressed
             results.append({
                 "original_name":   file.filename or "image",
                 "compressed_name": f"compressed_{stem}.{ext}",
@@ -783,6 +791,8 @@ async def api_compress(
                 "compressed_size": comp_size,
                 "compressed_b64":  comp_b64,
                 "mime":            mime,
+                # skipped=True : le fichier était déjà optimisé, on retourne l'original
+                **({"note": "Déjà optimisé — fichier original retourné sans modification."} if skipped else {}),
             })
         except Exception as exc:
             print(f"[WARN] Compression échouée {file.filename!r}: {exc}", flush=True)
@@ -825,8 +835,8 @@ async def api_compress_zip(
                 print(f"[WARN] ZIP compress skip {file.filename!r}: trop volumineux ({len(content)} o)", flush=True)
                 del content; gc.collect(); continue
             try:
-                comp_result          = await _compress_async(content, file.filename, quality)
-                compressed, ext, _   = comp_result
+                comp_result               = await _compress_async(content, file.filename, quality)
+                compressed, ext, _, _skipped = comp_result
                 zf.writestr(f"compressed_{_safe_stem(file.filename)}.{ext}", compressed)
                 del compressed
             except Exception as exc:

@@ -241,6 +241,7 @@ function renderResult(r, originalFile) {
   const ratio    = ((1 - r.compressed_size / r.original_size) * 100).toFixed(1);
   const saving   = r.original_size - r.compressed_size;
   const positive = parseFloat(ratio) > 0;
+  const skipped  = !!r.note;  // serveur a retourné l'original car déjà optimisé
 
   // Aperçu "avant" : fichier local, pas de transfert réseau
   const originalSrc = URL.createObjectURL(originalFile);
@@ -257,13 +258,28 @@ function renderResult(r, originalFile) {
   // Libellé du format de sortie
   const fmtLabel = r.mime === 'image/png' ? 'PNG' : r.mime === 'image/webp' ? 'WebP' : 'JPG';
 
+  // Bandeau informatif si le fichier était déjà optimisé
+  const skippedBanner = skipped ? `
+    <p style="font-size:.78rem;color:#92400e;background:#fef3c7;border-radius:0 0 10px 10px;
+              padding:.45rem .85rem;margin:0;text-align:center;">
+      ℹ️ Ce fichier est déjà optimisé — aucun gain possible à cette qualité.
+    </p>` : '';
+
+  // Bandeau cross-sell WebP uniquement si le fichier n'est pas déjà optimisé
+  const crossBanner = (!skipped && r.mime === 'image/jpeg') ? `
+    <p style="font-size:.78rem;color:#555;background:#f0eeff;border-radius:0 0 10px 10px;
+              padding:.45rem .85rem;margin:0;text-align:center;">
+      💡 Réduire encore plus ?
+      <a href="/" style="color:#6c63ff;font-weight:600;">Convertir en WebP pour −90% →</a>
+    </p>` : '';
+
   const card = document.createElement('div');
   card.className = 'result-card';
   card.innerHTML = `
     <div class="result-header">
       <span class="result-filename">${escHtml(r.compressed_name)}</span>
       <span class="result-badge ${positive ? 'badge-success' : 'badge-neutral'}">
-        ${positive ? '−' + ratio + '%' : '+' + Math.abs(ratio) + '%'}
+        ${skipped ? '—' : (positive ? '−' + ratio + '%' : '+' + Math.abs(ratio) + '%')}
       </span>
     </div>
     <div class="result-images">
@@ -280,21 +296,16 @@ function renderResult(r, originalFile) {
       </div>
     </div>
     <div class="result-footer">
-      <span class="result-saving">Gain : ${fmtSize(saving)}</span>
+      <span class="result-saving">${skipped ? 'Déjà optimisé' : 'Gain : ' + fmtSize(saving)}</span>
       <button class="btn btn-sm btn-outline" data-name="${escHtml(r.compressed_name)}">
         ⬇ Télécharger
       </button>
     </div>
-    ${r.mime === 'image/jpeg' ? `
-    <p style="font-size:.78rem;color:#555;background:#f0eeff;border-radius:0 0 10px 10px;
-              padding:.45rem .85rem;margin:0;text-align:center;">
-      💡 Réduire encore plus ?
-      <a href="/" style="color:#6c63ff;font-weight:600;">Convertir en WebP pour −90% →</a>
-    </p>` : ''}`;
+    ${skippedBanner}${crossBanner}`;
 
   card.querySelector('[data-name]').addEventListener('click', () => {
     triggerDownload(compBlob, r.compressed_name);
-    scheduleTpPopup(r.original_size - r.compressed_size);
+    if (!skipped) scheduleTpPopup(r.original_size - r.compressed_size);
   });
 
   resultsContainer.appendChild(card);
