@@ -362,7 +362,9 @@ def _compress(content: bytes, filename: str | None, quality: int):
                 tmp = img.convert(mode)
                 img.close()
                 img = tmp
-            img.save(out_buf, format='WebP', quality=quality, method=4)
+            # method=2 : bon compromis vitesse/compression pour une recompression
+            # (method=4 est réservé à la conversion WebP où la qualité prime)
+            img.save(out_buf, format='WebP', quality=quality, method=2)
             return out_buf.getvalue(), 'webp', 'image/webp'
         elif ext == 'png':  # PNG — format sans perte, transparence conservée
             if img.mode == 'P':
@@ -370,16 +372,17 @@ def _compress(content: bytes, filename: str | None, quality: int):
                 tmp = img.convert(mode)
                 img.close()
                 img = tmp
-            # compress_level=6 : bon équilibre vitesse/taille
-            img.save(out_buf, format='PNG', optimize=False, compress_level=6)
+            # compress_level=1 : 3-4× plus rapide que level=6, ~10% plus lourd.
+            # Pour des images web c'est le bon équilibre — on compresse pour le poids,
+            # pas pour atteindre le maximum théorique zlib.
+            img.save(out_buf, format='PNG', optimize=False, compress_level=1)
             return out_buf.getvalue(), 'png', 'image/png'
-        else:  # Fallback : on compresse en JPEG
-            if img.mode not in ('RGB', 'L'):
-                tmp = img.convert('RGB')
-                img.close()
-                img = tmp
-            img.save(out_buf, format='JPEG', quality=quality, optimize=False, progressive=False)
-            return out_buf.getvalue(), 'jpg', 'image/jpeg'
+        else:
+            # Format non supporté (GIF, BMP, TIFF, AVIF…) — on refuse explicitement
+            # plutôt que de convertir silencieusement en JPEG sans prévenir l'utilisateur.
+            raise ValueError(
+                f"Format '{ext}' non supporté. Utilisez JPG, PNG ou WebP."
+            )
     finally:
         if img is not None:
             try:

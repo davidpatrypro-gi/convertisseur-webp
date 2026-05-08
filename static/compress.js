@@ -81,10 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── File handling ──────────────────────────────────────────────────────────────
 function isImage(file) {
-  // Double vérification : MIME type OU extension (Windows ne mappe pas toujours WebP)
-  if (file.type.startsWith('image/')) return true;
+  // Formats supportés : JPG, PNG, WebP uniquement.
+  // On évite file.type.startsWith('image/') qui accepterait les SVG, GIF, TIFF…
+  // et provoquerait une conversion silencieuse ou une erreur serveur.
+  const accepted = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (accepted.includes(file.type)) return true;
+  // Fallback extension (Windows ne mappe pas toujours le MIME WebP)
   const ext = file.name.split('.').pop().toLowerCase();
-  return ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'avif'].includes(ext);
+  return ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
 }
 
 function handleFiles(files) {
