@@ -4,6 +4,19 @@
 let uploadedFiles    = [];
 let convertedResults = [];
 
+// ── Object URL registry ────────────────────────────────────────────────────────
+// Toutes les URLs créées via createObjectURL() sont enregistrées ici.
+// Elles sont révoquées (et la mémoire libérée) au prochain lancement ou au
+// rechargement de la liste. Sans cela, les blobs restent en RAM jusqu'au
+// rechargement de la page.
+let _fileListUrls = [];
+let _resultUrls   = [];
+
+function _revokeUrls(arr) {
+  arr.forEach((u) => { try { URL.revokeObjectURL(u); } catch (_) {} });
+  arr.length = 0;  // vide le tableau sur place
+}
+
 // ── DOM refs ───────────────────────────────────────────────────────────────────
 const dropZone          = document.getElementById('drop-zone');
 const fileInput         = document.getElementById('file-input');
@@ -99,9 +112,11 @@ function handleFiles(files) {
 }
 
 function renderFileList() {
+  _revokeUrls(_fileListUrls);       // libère les URLs des miniatures précédentes
   fileListContainer.innerHTML = '';
   uploadedFiles.forEach((file, i) => {
     const url = URL.createObjectURL(file);
+    _fileListUrls.push(url);
     const item = document.createElement('div');
     item.className = 'file-item';
     item.innerHTML = `
@@ -128,6 +143,7 @@ function renderFileList() {
 // ── Conversion ─────────────────────────────────────────────────────────────────
 async function convertAll() {
   if (!uploadedFiles.length) return;
+  _revokeUrls(_resultUrls);        // libère les URLs des cartes résultat précédentes
   const quality  = +qualitySlider.value;
   convertedResults = [];
 
@@ -215,13 +231,6 @@ async function convertAll() {
   }
 }
 
-// ── Progress ───────────────────────────────────────────────────────────────────
-function setProgress(done, total) {
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  progressBar.style.width = pct + '%';
-  progressText.textContent = `Conversion en cours… ${done} / ${total}`;
-}
-
 // ── Render results ─────────────────────────────────────────────────────────────
 function renderResult(r, originalFile) {
   const ratio    = ((1 - r.converted_size / r.original_size) * 100).toFixed(1);
@@ -230,6 +239,7 @@ function renderResult(r, originalFile) {
 
   // Aperçu "avant" : on utilise le fichier local, zéro octet supplémentaire transféré
   const originalSrc = URL.createObjectURL(originalFile);
+  _resultUrls.push(originalSrc);  // enregistré pour révocation au prochain lancement
 
   // Aperçu "après" : blob WebP depuis le base64 reçu
   const webpBytes = atob(r.webp_b64);
@@ -237,6 +247,7 @@ function renderResult(r, originalFile) {
   for (let i = 0; i < webpBytes.length; i++) webpArr[i] = webpBytes.charCodeAt(i);
   const webpBlob  = new Blob([webpArr], { type: 'image/webp' });
   const webpSrc   = URL.createObjectURL(webpBlob);
+  _resultUrls.push(webpSrc);      // enregistré pour révocation au prochain lancement
 
   const card = document.createElement('div');
   card.className = 'result-card';
@@ -382,13 +393,6 @@ function closeTp(overlay) {
 }
 
 // ── Downloads ──────────────────────────────────────────────────────────────────
-function downloadWebp(b64, filename) {
-  const bytes = atob(b64);
-  const arr   = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-  triggerDownload(new Blob([arr], { type: 'image/webp' }), filename);
-}
-
 async function downloadZip() {
   if (!uploadedFiles.length) return;
   zipBtn.disabled = true;
@@ -397,12 +401,20 @@ async function downloadZip() {
     const fd = new FormData();
     uploadedFiles.forEach((f) => fd.append('files', f));
     fd.append('quality', qualitySlider.value);
-    const res  = await fetch('/api/convert-zip', { method: 'POST', body: fd });
+    const res = await fetch('/api/convert-zip', { method: 'POST', body: fd });
+    if (!res.ok) {
+      const s = res.status;
+      const msg = (s === 502 || s === 503)
+        ? 'Le serveur est surchargé. Patientez 30 secondes et réessayez.'
+        : `Erreur lors de la création du ZIP (HTTP ${s}).`;
+      throw new Error(msg);
+    }
     const blob = await res.blob();
     triggerDownload(blob, 'images_webp.zip');
-    // Popup TP après téléchargement ZIP
     const totalGain = convertedResults.reduce((s, r) => s + (r.original_size - r.converted_size), 0);
     scheduleTpPopup(totalGain);
+  } catch (err) {
+    alert('⚠ ' + err.message);
   } finally {
     zipBtn.disabled = false;
     zipBtn.textContent = '⬇ Télécharger toutes les images en ZIP';

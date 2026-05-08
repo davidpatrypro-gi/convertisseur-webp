@@ -155,7 +155,9 @@ async def redirect_www(request: Request, call_next):
 _executor = ThreadPoolExecutor(max_workers=2)
 
 # Largeur max des aperçus base64 renvoyés au client (réduit la RAM et la taille JSON)
-_PREVIEW_MAX_W = 800
+_PREVIEW_MAX_W  = 800
+# Taille max par fichier uploadé — rejeté avant décodage Pillow (évite les OOM)
+_MAX_FILE_BYTES = 20 * 1024 * 1024  # 20 Mo
 
 
 def _log_mem(label: str) -> None:
@@ -212,6 +214,30 @@ def _file_ext(filename: str | None) -> str:
 
 # ── Conversion helpers ─────────────────────────────────────────────────────────
 
+def _normalize_mode(img: Image.Image) -> Image.Image:
+    """Normalise le mode colorimétrique d'une Image Pillow vers RGB ou L.
+
+    - Transparence (RGBA/LA/P+alpha) → fond blanc RGB (nécessaire pour WebP lossy)
+    - CMYK → RGB (photos pro au format CMYK)
+    - Tout autre mode exotique → RGB
+
+    Ferme l'image source si elle est remplacée par un nouvel objet Pillow.
+    Centralise la logique pour _to_webp et _to_webp_with_thumb afin d'éviter
+    la duplication et les divergences de comportement entre les deux fonctions.
+    """
+    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+        bg  = Image.new("RGB", img.size, (255, 255, 255))
+        src = img.convert("RGBA")
+        bg.paste(src, mask=src.split()[3])
+        src.close(); img.close()
+        return bg
+    if img.mode == "CMYK":
+        tmp = img.convert("RGB"); img.close(); return tmp
+    if img.mode not in ("RGB", "L"):
+        tmp = img.convert("RGB"); img.close(); return tmp
+    return img  # Déjà dans un mode compatible WebP
+
+
 def _to_webp(content: bytes, quality: int) -> bytes:
     """Conversion synchrone vers WebP — exécutée dans le thread pool.
     Tous les objets Pillow et BytesIO sont fermés explicitement en sortie."""
@@ -228,23 +254,7 @@ def _to_webp(content: bytes, quality: int) -> bytes:
         if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
             img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
-        # Normalisation du mode colorimétrique → RGB (fermeture immédiate des images intermédiaires)
-        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-            bg  = Image.new("RGB", img.size, (255, 255, 255))
-            src = img.convert("RGBA")
-            bg.paste(src, mask=src.split()[3])
-            src.close()
-            img.close()
-            img = bg
-        elif img.mode == "CMYK":
-            tmp = img.convert("RGB")
-            img.close()
-            img = tmp
-        elif img.mode not in ("RGB", "L"):
-            tmp = img.convert("RGB")
-            img.close()
-            img = tmp
-
+        img = _normalize_mode(img)
         img.save(out_buf, format="WebP", quality=quality, method=0)
         return out_buf.getvalue()
     finally:
@@ -287,16 +297,7 @@ def _to_webp_with_thumb(content: bytes, quality: int) -> tuple[int, str]:
         if len(content) > MAX_BYTES and (img.width > MAX_DIM or img.height > MAX_DIM):
             img.thumbnail((MAX_DIM, MAX_DIM), Image.BILINEAR)
 
-        # Normalisation colorimétrique — images intermédiaires fermées immédiatement
-        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-            bg  = Image.new("RGB", img.size, (255, 255, 255))
-            src = img.convert("RGBA")
-            bg.paste(src, mask=src.split()[3])
-            src.close(); img.close(); img = bg
-        elif img.mode == "CMYK":
-            tmp = img.convert("RGB"); img.close(); img = tmp
-        elif img.mode not in ("RGB", "L"):
-            tmp = img.convert("RGB"); img.close(); img = tmp
+        img = _normalize_mode(img)
 
         # ① WebP pleine résolution → conv_size (bytes non conservés côté serveur)
         img.save(full_buf, format="WebP", quality=quality, method=0)
@@ -637,6 +638,18 @@ async def api_convert(
     for file in files:
         content = await file.read()
         stem    = _safe_stem(file.filename)
+        # Rejet immédiat si le fichier dépasse la limite : évite un décodage Pillow OOM
+        if len(content) > _MAX_FILE_BYTES:
+            mb = round(len(content) / 1024 / 1024, 1)
+            results.append({
+                "original_name":  file.filename or "image",
+                "webp_name":      f"{stem}.webp",
+                "original_size":  len(content),
+                "converted_size": 0,
+                "webp_b64":       None,
+                "error":          f"Fichier trop volumineux ({mb} Mo — max {_MAX_FILE_BYTES//1024//1024} Mo).",
+            })
+            del content; gc.collect(); continue
         try:
             # Un seul appel thread pool = un seul décodage Pillow (conversion + aperçu)
             conv_size, preview_b64 = await loop.run_in_executor(
@@ -692,6 +705,9 @@ async def api_convert_zip(
     with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
         for file in files:
             content = await file.read()
+            if len(content) > _MAX_FILE_BYTES:
+                print(f"[WARN] ZIP convert skip {file.filename!r}: trop volumineux ({len(content)} o)", flush=True)
+                del content; gc.collect(); continue
             try:
                 webp_result = await _to_webp_async(content, quality)
                 total_orig += len(content)
@@ -732,6 +748,18 @@ async def api_compress(
     for file in files:
         content = await file.read()
         stem    = _safe_stem(file.filename)
+        if len(content) > _MAX_FILE_BYTES:
+            mb = round(len(content) / 1024 / 1024, 1)
+            results.append({
+                "original_name":   file.filename or "image",
+                "compressed_name": f"compressed_{stem}.jpg",
+                "original_size":   len(content),
+                "compressed_size": 0,
+                "compressed_b64":  None,
+                "mime":            "image/jpeg",
+                "error":           f"Fichier trop volumineux ({mb} Mo — max {_MAX_FILE_BYTES//1024//1024} Mo).",
+            })
+            del content; gc.collect(); continue
         try:
             comp_result          = await _compress_async(content, file.filename, quality)
             compressed, ext, mime = comp_result
@@ -783,6 +811,9 @@ async def api_compress_zip(
     with zipfile.ZipFile(zip_buf, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
         for file in files:
             content = await file.read()
+            if len(content) > _MAX_FILE_BYTES:
+                print(f"[WARN] ZIP compress skip {file.filename!r}: trop volumineux ({len(content)} o)", flush=True)
+                del content; gc.collect(); continue
             try:
                 comp_result          = await _compress_async(content, file.filename, quality)
                 compressed, ext, _   = comp_result

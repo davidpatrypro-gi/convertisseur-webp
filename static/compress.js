@@ -4,6 +4,15 @@
 let uploadedFiles    = [];
 let convertedResults = [];
 
+// ── Object URL registry ────────────────────────────────────────────────────────
+let _fileListUrls = [];
+let _resultUrls   = [];
+
+function _revokeUrls(arr) {
+  arr.forEach((u) => { try { URL.revokeObjectURL(u); } catch (_) {} });
+  arr.length = 0;
+}
+
 // ── DOM refs ───────────────────────────────────────────────────────────────────
 const dropZone          = document.getElementById('drop-zone');
 const fileInput         = document.getElementById('file-input');
@@ -88,9 +97,11 @@ function handleFiles(files) {
 }
 
 function renderFileList() {
+  _revokeUrls(_fileListUrls);
   fileListContainer.innerHTML = '';
   uploadedFiles.forEach((file, i) => {
     const url  = URL.createObjectURL(file);
+    _fileListUrls.push(url);
     const item = document.createElement('div');
     item.className = 'file-item';
     item.innerHTML = `
@@ -117,6 +128,7 @@ function renderFileList() {
 // ── Compression ────────────────────────────────────────────────────────────────
 async function compressAll() {
   if (!uploadedFiles.length) return;
+  _revokeUrls(_resultUrls);
   const quality = +qualitySlider.value;
   convertedResults = [];
 
@@ -228,6 +240,7 @@ function renderResult(r, originalFile) {
 
   // Aperçu "avant" : fichier local, pas de transfert réseau
   const originalSrc = URL.createObjectURL(originalFile);
+  _resultUrls.push(originalSrc);
 
   // Aperçu "après" : blob décodé depuis le base64
   const compBytes = atob(r.compressed_b64);
@@ -235,6 +248,7 @@ function renderResult(r, originalFile) {
   for (let i = 0; i < compBytes.length; i++) compArr[i] = compBytes.charCodeAt(i);
   const compBlob  = new Blob([compArr], { type: r.mime });
   const compSrc   = URL.createObjectURL(compBlob);
+  _resultUrls.push(compSrc);
 
   // Libellé du format de sortie
   const fmtLabel = r.mime === 'image/png' ? 'PNG' : r.mime === 'image/webp' ? 'WebP' : 'JPG';
@@ -302,11 +316,20 @@ async function downloadZip() {
     const fd = new FormData();
     uploadedFiles.forEach((f) => fd.append('files', f));
     fd.append('quality', qualitySlider.value);
-    const res  = await fetch('/api/compress-zip', { method: 'POST', body: fd });
+    const res = await fetch('/api/compress-zip', { method: 'POST', body: fd });
+    if (!res.ok) {
+      const s = res.status;
+      const msg = (s === 502 || s === 503)
+        ? 'Le serveur est surchargé. Patientez 30 secondes et réessayez.'
+        : `Erreur lors de la création du ZIP (HTTP ${s}).`;
+      throw new Error(msg);
+    }
     const blob = await res.blob();
     triggerDownload(blob, 'images_compressed.zip');
     const totalGain = convertedResults.reduce((s, r) => s + (r.original_size - r.compressed_size), 0);
     scheduleTpPopup(totalGain);
+  } catch (err) {
+    alert('⚠ ' + err.message);
   } finally {
     zipBtn.disabled    = false;
     zipBtn.textContent = '⬇ Télécharger toutes les images en ZIP';
