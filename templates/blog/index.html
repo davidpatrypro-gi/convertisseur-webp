@@ -30,70 +30,20 @@
   <div class="container">
     <div class="blog-grid-main">
 
+      {% for post in blog_posts %}
       <article class="blog-card">
-        <div class="blog-card-img" style="background:#F0EEFF;font-size:3.5rem">🗜️</div>
+        <div class="blog-card-img" style="background:{{ post.bg }};font-size:3.5rem">{{ post.emoji }}</div>
         <div class="blog-card-body">
-          <span class="blog-tag">SEO &amp; Performance</span>
+          <span class="blog-tag">{{ post.tag }}</span>
           <h2 style="font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4">
-            Compresser ses images : le levier SEO le plus sous-estimé de 2026
+            {{ post.title }}
           </h2>
-          <p>Pourquoi compresser vos images JPG et PNG booste directement votre LCP, votre score PageSpeed et votre classement Google. Guide complet avec exemples chiffrés.</p>
-          <a href="/blog/compresser-images-en-ligne" class="blog-card-link"
-             aria-label="Lire : Compresser ses images, le levier SEO le plus sous-estimé de 2026">Lire l'article →</a>
+          <p>{{ post.description }}</p>
+          <a href="/blog/{{ post.slug }}" class="blog-card-link"
+             aria-label="Lire : {{ post.title }}">Lire l'article →</a>
         </div>
       </article>
-
-      <article class="blog-card">
-        <div class="blog-card-img" style="background:#ECFDF5;font-size:3.5rem">📍</div>
-        <div class="blog-card-body">
-          <span class="blog-tag">SEO Local</span>
-          <h2 style="font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4">
-            SEO Local en 2026 : Le Guide Complet pour Dominer Google dans Votre Ville
-          </h2>
-          <p>Google Business Profile, Core Web Vitals, images WebP, citations NAP : tout ce qu'il faut pour apparaître en premier dans les recherches locales.</p>
-          <a href="/blog/seo-local-2026-guide-complet" class="blog-card-link"
-             aria-label="Lire : SEO Local en 2026, le guide complet">Lire l'article →</a>
-        </div>
-      </article>
-
-      <article class="blog-card">
-        <div class="blog-card-img" style="background:#EEF2FF;font-size:3.5rem">📈</div>
-        <div class="blog-card-body">
-          <span class="blog-tag">SEO</span>
-          <h2 style="font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4">
-            Pourquoi convertir vos images en WebP est essentiel pour votre SEO
-          </h2>
-          <p>Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre positionnement Google. Chiffres et conseils pratiques.</p>
-          <a href="/blog/pourquoi-convertir-images-webp-seo" class="blog-card-link"
-             aria-label="Lire : Pourquoi convertir vos images en WebP est essentiel pour votre SEO">Lire l'article →</a>
-        </div>
-      </article>
-
-      <article class="blog-card">
-        <div class="blog-card-img" style="background:#F0FDF4;font-size:3.5rem">🔬</div>
-        <div class="blog-card-body">
-          <span class="blog-tag">Comparatif</span>
-          <h2 style="font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4">
-            WebP vs JPG vs PNG : quel format choisir pour vos images web ?
-          </h2>
-          <p>Comparaison complète des trois formats d'image dominants du web. Tableau de synthèse, cas d'usage et recommandations selon votre situation.</p>
-          <a href="/blog/webp-vs-jpg-png-comparaison" class="blog-card-link"
-             aria-label="Lire : WebP vs JPG vs PNG, quel format choisir pour vos images web">Lire l'article →</a>
-        </div>
-      </article>
-
-      <article class="blog-card">
-        <div class="blog-card-img" style="background:#FFF7ED;font-size:3.5rem">🚀</div>
-        <div class="blog-card-body">
-          <span class="blog-tag">Performance</span>
-          <h2 style="font-size:1rem;font-weight:700;margin-bottom:.5rem;line-height:1.4">
-            5 techniques pour optimiser vos images et booster la vitesse de votre site
-          </h2>
-          <p>WebP, lazy loading, srcset, redimensionnement et compression intelligente : le guide complet pour des images parfaitement optimisées.</p>
-          <a href="/blog/optimiser-images-vitesse-site-google" class="blog-card-link"
-             aria-label="Lire : 5 techniques pour optimiser vos images et booster la vitesse de votre site">Lire l'article →</a>
-        </div>
-      </article>
+      {% endfor %}
 
     </div>
   </div>

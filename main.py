@@ -414,6 +414,97 @@ async def _stream_buf(buf: io.BytesIO) -> AsyncGenerator[bytes, None]:
         yield chunk
 
 
+# ── Configuration des articles de blog ────────────────────────────────────────
+# Chaque article a une date de publication. Si published_at est dans le futur :
+#   - la route retourne 404
+#   - l'article n'apparaît pas dans /blog
+#   - l'article n'apparaît pas dans le sitemap.xml
+
+BLOG_POSTS = [
+    {
+        "slug":         "meilleures-agences-seo-paris",
+        "title":        "Meilleures agences SEO à Paris en 2026 : comment choisir la bonne ?",
+        "description":  "Nos critères pour bien choisir votre agence SEO à Paris, les erreurs à éviter et ce que vous pouvez optimiser vous-même. Guide complet 2026.",
+        "tag":          "SEO Local",
+        "emoji":        "🏙️",
+        "bg":           "#EFF6FF",
+        "published_at": date(2026, 5, 10),
+        "lastmod":      "2026-05-10",
+        "priority":     "0.8",
+    },
+    {
+        "slug":         "meilleures-agences-seo-toulouse",
+        "title":        "Meilleures agences SEO à Toulouse en 2026 : notre sélection",
+        "description":  "Vizion, freelances, agences généralistes : notre sélection d'agences SEO à Toulouse avec les critères pour faire le bon choix.",
+        "tag":          "SEO Local",
+        "emoji":        "🌹",
+        "bg":           "#FFF1F2",
+        "published_at": date(2026, 5, 14),
+        "lastmod":      "2026-05-14",
+        "priority":     "0.8",
+    },
+    {
+        "slug":         "compresser-images-en-ligne",
+        "title":        "Compresser ses images : le levier SEO le plus sous-estimé de 2026",
+        "description":  "Pourquoi compresser vos images JPG et PNG booste directement votre LCP, votre score PageSpeed et votre classement Google. Guide complet avec exemples chiffrés.",
+        "tag":          "SEO & Performance",
+        "emoji":        "🗜️",
+        "bg":           "#F0EEFF",
+        "published_at": date(2026, 5, 4),
+        "lastmod":      "2026-05-04",
+        "priority":     "0.8",
+    },
+    {
+        "slug":         "seo-local-2026-guide-complet",
+        "title":        "SEO Local en 2026 : Le Guide Complet pour Dominer Google dans Votre Ville",
+        "description":  "Google Business Profile, Core Web Vitals, images WebP, citations NAP : tout ce qu'il faut pour apparaître en premier dans les recherches locales.",
+        "tag":          "SEO Local",
+        "emoji":        "📍",
+        "bg":           "#ECFDF5",
+        "published_at": date(2026, 4, 27),
+        "lastmod":      "2026-04-27",
+        "priority":     "0.8",
+    },
+    {
+        "slug":         "pourquoi-convertir-images-webp-seo",
+        "title":        "Pourquoi convertir vos images en WebP est essentiel pour votre SEO",
+        "description":  "Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre positionnement Google. Chiffres et conseils pratiques.",
+        "tag":          "SEO",
+        "emoji":        "📈",
+        "bg":           "#EEF2FF",
+        "published_at": date(2026, 4, 24),
+        "lastmod":      "2026-04-24",
+        "priority":     "0.7",
+    },
+    {
+        "slug":         "webp-vs-jpg-png-comparaison",
+        "title":        "WebP vs JPG vs PNG : quel format choisir pour vos images web ?",
+        "description":  "Comparaison complète des trois formats d'image dominants du web. Tableau de synthèse, cas d'usage et recommandations selon votre situation.",
+        "tag":          "Comparatif",
+        "emoji":        "🔬",
+        "bg":           "#F0FDF4",
+        "published_at": date(2026, 4, 24),
+        "lastmod":      "2026-04-24",
+        "priority":     "0.7",
+    },
+    {
+        "slug":         "optimiser-images-vitesse-site-google",
+        "title":        "5 techniques pour optimiser vos images et booster la vitesse de votre site",
+        "description":  "WebP, lazy loading, srcset, redimensionnement et compression intelligente : le guide complet pour des images parfaitement optimisées.",
+        "tag":          "Performance",
+        "emoji":        "🚀",
+        "bg":           "#FFF7ED",
+        "published_at": date(2026, 4, 24),
+        "lastmod":      "2026-04-24",
+        "priority":     "0.7",
+    },
+]
+
+def _is_published(post: dict) -> bool:
+    """Retourne True si la date de publication est aujourd'hui ou dans le passé."""
+    return post["published_at"] <= date.today()
+
+
 # ── Pages ──────────────────────────────────────────────────────────────────────
 
 @app.head("/")
@@ -450,7 +541,8 @@ async def politique_confidentialite(request: Request):
 
 @app.get("/blog", response_class=HTMLResponse)
 async def blog(request: Request):
-    return templates.TemplateResponse(request, "blog/index.html")
+    published = [p for p in BLOG_POSTS if _is_published(p)]
+    return templates.TemplateResponse(request, "blog/index.html", {"blog_posts": published})
 
 
 @app.get("/blog/pourquoi-convertir-images-webp-seo", response_class=HTMLResponse)
@@ -473,10 +565,51 @@ async def blog_compresser_images(request: Request):
     return templates.TemplateResponse(request, "blog/compresser-images-en-ligne.html")
 
 
+@app.get("/blog/meilleures-agences-seo-paris", response_class=HTMLResponse)
+async def blog_agences_paris(request: Request):
+    post = next((p for p in BLOG_POSTS if p["slug"] == "meilleures-agences-seo-paris"), None)
+    if not post or not _is_published(post):
+        raise HTTPException(status_code=404)
+    return templates.TemplateResponse(request, "blog/meilleures-agences-seo-paris.html")
+
+
+@app.get("/blog/meilleures-agences-seo-toulouse", response_class=HTMLResponse)
+async def blog_agences_toulouse(request: Request):
+    post = next((p for p in BLOG_POSTS if p["slug"] == "meilleures-agences-seo-toulouse"), None)
+    if not post or not _is_published(post):
+        raise HTTPException(status_code=404)
+    return templates.TemplateResponse(request, "blog/meilleures-agences-seo-toulouse.html")
+
+
 @app.get("/sitemap.xml")
 async def sitemap():
-    content = open("static/sitemap.xml", "r", encoding="utf-8").read()
-    return Response(content=content, media_type="application/xml")
+    """Sitemap généré dynamiquement — les articles non publiés sont exclus."""
+    static_urls = [
+        ("https://convertwebp.fr/",                       "2026-04-27", "weekly",  "1.0"),
+        ("https://convertwebp.fr/compresser-images",       "2026-04-30", "weekly",  "0.9"),
+        ("https://convertwebp.fr/blog",                    "2026-05-10", "weekly",  "0.8"),
+        ("https://convertwebp.fr/contact",                 "2026-04-27", "monthly", "0.6"),
+        ("https://convertwebp.fr/mentions-legales",        "2026-04-25", "yearly",  "0.2"),
+        ("https://convertwebp.fr/politique-confidentialite","2026-04-25", "yearly",  "0.2"),
+    ]
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for loc, lastmod, freq, prio in static_urls:
+        lines.append(
+            f"\n  <url>\n    <loc>{loc}</loc>\n    <lastmod>{lastmod}</lastmod>"
+            f"\n    <changefreq>{freq}</changefreq>\n    <priority>{prio}</priority>\n  </url>"
+        )
+    for post in BLOG_POSTS:
+        if _is_published(post):
+            lines.append(
+                f"\n  <url>\n    <loc>https://convertwebp.fr/blog/{post['slug']}</loc>"
+                f"\n    <lastmod>{post['lastmod']}</lastmod>"
+                f"\n    <changefreq>monthly</changefreq>\n    <priority>{post['priority']}</priority>\n  </url>"
+            )
+    lines.append("\n</urlset>")
+    return Response("".join(lines), media_type="application/xml")
 
 
 @app.get("/robots.txt")
@@ -485,14 +618,8 @@ async def robots():
     return Response(content=content, media_type="text/plain")
 
 
-_PARIS = timezone(timedelta(hours=2))  # CEST avril 2026 = UTC+2
-_PUBLISH_SEO_LOCAL = datetime(2026, 4, 27, 9, 0, 0, tzinfo=_PARIS)
-
 @app.get("/blog/seo-local-2026-guide-complet", response_class=HTMLResponse)
 async def blog_seo_local(request: Request):
-    # Publication planifiée : visible le 27 avril 2026 à 09h00 (heure de Paris)
-    if datetime.now(tz=timezone.utc) < _PUBLISH_SEO_LOCAL:
-        return Response(status_code=404)
     return templates.TemplateResponse(request, "blog/seo-local-2026-guide-complet.html")
 
 
