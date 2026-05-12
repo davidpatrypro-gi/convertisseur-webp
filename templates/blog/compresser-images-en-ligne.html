@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}Compresser ses images : le levier SEO le plus sous-estimé de 2026 | ConvertWebP{% endblock %}
 {% block description %}Découvrez pourquoi compresser vos images JPG et PNG booste directement votre SEO. Guide complet avec conseils pratiques, comparatif des formats et outil gratuit.{% endblock %}
@@ -49,7 +49,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -61,8 +61,9 @@
     <h1>Compresser ses images : le levier SEO<br>le plus sous-estimé de 2026</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p>Quand on parle de SEO, on pense immédiatement aux mots-clés, aux backlinks, à la structure des balises. On oublie presque systématiquement un levier pourtant décisif : le poids des images. Et c'est précisément là que beaucoup de sites perdent des positions sans comprendre pourquoi.</p>
 
@@ -112,7 +113,7 @@
     </tbody>
   </table>
 
-  <p>Ces chiffres sont obtenus avec notre <a href="/compresser-images" style="color:#6c63ff;font-weight:600;">outil de compression d'images en ligne</a>, en utilisant une qualité réglée à 60 — le meilleur compromis entre légèreté et rendu visuel pour une utilisation web.</p>
+  <p>Ces chiffres sont obtenus avec notre <a href="/compresser-images" style="color:#6c63ff;font-weight:600;">outil de compression d'images en ligne</a>, en utilisant une qualité réglée à 60, le meilleur compromis entre légèreté et rendu visuel pour une utilisation web.</p>
 
   <h2>Compresser JPG, PNG ou WebP : quelle différence pour le SEO ?</h2>
 
@@ -187,6 +188,9 @@
 
   <p>La bonne nouvelle, c'est que c'est l'une des rares optimisations SEO qu'un non-développeur peut faire seul, sans toucher au code, en quelques minutes. Commencez par <a href="/compresser-images" style="color:#6c63ff;font-weight:600;">compresser vos images JPG et PNG</a>, puis passez à la <a href="/" style="color:#6c63ff;font-weight:600;">conversion en WebP</a> pour maximiser les gains.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -195,7 +199,9 @@
       <li><a href="/blog/optimiser-images-vitesse-site-google">5 techniques pour optimiser vos images et booster la vitesse de votre site</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Compressez vos images maintenant — gratuitement</h3>
     <p>Notre outil compresse vos JPG et PNG en quelques secondes. Sans inscription, sans limite de fichiers, aperçu avant/après inclus.</p>
@@ -207,6 +213,4 @@
     <p style="margin:0 0 1rem;font-size:.95rem;color:#333;">Recevez une analyse complète de votre site : Core Web Vitals, images, PageSpeed. Rapport personnalisé sous 48h, 100% gratuit.</p>
     <a href="/contact" class="btn btn-primary" style="display:inline-block;">Demandez votre <strong>audit SEO gratuit</strong> →</a>
   </aside>
-
-</article>
 {% endblock %}

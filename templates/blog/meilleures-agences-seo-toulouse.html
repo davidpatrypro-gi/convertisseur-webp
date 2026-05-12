@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}Meilleures agences SEO à Toulouse en 2026 : notre sélection | ConvertWebP{% endblock %}
 {% block description %}Agences SEO à Toulouse : sélection, critères de choix et questions à poser avant de signer. Vizion, freelances, agences généralistes — on fait le point.{% endblock %}
@@ -47,7 +47,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -59,8 +59,9 @@
     <h1>Meilleures agences SEO à Toulouse en 2026 :<br>notre sélection</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p><em>Toulouse a beau être la quatrième ville de France, son tissu d'agences digitales est dense et la qualité très variable. Entre les agences spécialisées, les généralistes du web et les freelances qui se réclament experts SEO, difficile de s'y retrouver. Voici comment choisir, et quelques noms à retenir.</em></p>
 
@@ -145,6 +146,9 @@
   <h3>Vaut-il mieux une agence locale ou une grande agence parisienne ?</h3>
   <p>Tout dépend de votre budget et de vos besoins. Une agence toulousaine sera souvent plus accessible, plus réactive sur la relation client, et mieux adaptée si vous avez besoin de présence locale. Une grande agence parisienne peut avoir plus de ressources sur des projets très ambitieux, mais pas nécessairement de meilleurs résultats.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -153,7 +157,9 @@
       <li><a href="/blog/pourquoi-convertir-images-webp-seo">Pourquoi convertir vos images en WebP est essentiel pour votre SEO</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Vous voulez savoir où en est votre site ?</h3>
     <p>Avant de choisir une agence, obtenez un retour honnête sur vos priorités SEO. Rapport personnalisé sous 48h, sans engagement.</p>
@@ -165,6 +171,4 @@
     <p style="margin:0 0 1rem;font-size:.95rem;color:#333;">La plupart des agences SEO commencent par recommander l'optimisation des images. Prenez de l'avance : convertissez vos visuels en WebP gratuitement, en quelques secondes.</p>
     <a href="/" class="btn btn-primary" style="display:inline-block;">Convertir mes images en WebP →</a>
   </aside>
-
-</article>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}SEO Local 2026 : Guide Complet pour Dominer Google dans Votre Ville | ConvertWebP{% endblock %}
 {% block description %}Découvrez comment dominer le Local Pack Google en 2026 : Google Business Profile, Core Web Vitals, images WebP, citations NAP et plan d'action en 5 étapes.{% endblock %}
@@ -46,7 +46,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -58,8 +58,9 @@
     <h1>SEO Local en 2026 : Le Guide Complet<br>pour Dominer Google dans Votre Ville</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p>Vous avez un commerce, un cabinet, un restaurant ou une agence ? Alors vous avez probablement déjà tapé le nom de votre activité suivi de votre ville dans Google, et espéré vous voir apparaître en premier. C'est exactement ça, le SEO local. Et en 2026, c'est devenu l'un des leviers marketing les plus rentables pour les entreprises qui ciblent une clientèle de proximité.</p>
   <p>Dans cet article, je vous explique comment fonctionne le référencement local, pourquoi les images jouent un rôle souvent sous-estimé, et quelles actions concrètes vous pouvez mettre en place dès aujourd'hui.</p>
@@ -115,7 +116,7 @@
   <p>C'est un point que beaucoup d'entrepreneurs négligent complètement. Pourtant, les images ont un impact direct sur votre visibilité locale, pour deux raisons :</p>
   <ol>
     <li>Sur <strong>Google Business Profile</strong>, les fiches avec des photos récentes et de qualité bénéficient d'un bien meilleur taux d'engagement. Google favorise les fiches actives.</li>
-    <li>Sur <strong>votre site web</strong>, des images trop lourdes ralentissent votre chargement — et la vitesse est un facteur de classement Google depuis 2010. Une page qui met plus de 3 secondes à charger perd en moyenne 53% de ses visiteurs mobiles avant même qu'ils aient vu votre contenu.</li>
+    <li>Sur <strong>votre site web</strong>, des images trop lourdes ralentissent votre chargement, et la vitesse est un facteur de classement Google depuis 2010. Une page qui met plus de 3 secondes à charger perd en moyenne 53% de ses visiteurs mobiles avant même qu'ils aient vu votre contenu.</li>
   </ol>
   <p>La solution ? Convertir vos images au format WebP avant de les publier. C'est exactement ce que permet notre <a href="/"><strong>outil de conversion gratuit</strong></a> : réduire le poids de vos images jusqu'à 90% sans perte de qualité visible. Pour les images de votre fiche GMB et de votre site local, nous recommandons une qualité de <strong>60</strong>, le compromis parfait entre légèreté et rendu visuel.</p>
 
@@ -142,14 +143,14 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td>Google Business Profile optimisé</td><td>⭐⭐⭐⭐⭐ Très fort</td><td>⭐⭐ Modéré</td></tr>
-      <tr><td>Avis Google (quantité + note)</td><td>⭐⭐⭐⭐⭐ Très fort</td><td>⭐⭐⭐ Fort</td></tr>
-      <tr><td>Proximité géographique</td><td>⭐⭐⭐⭐⭐ Très fort</td><td>⭐ Faible</td></tr>
-      <tr><td>Cohérence des citations NAP</td><td>⭐⭐⭐⭐ Fort</td><td>⭐⭐⭐ Fort</td></tr>
-      <tr><td>Backlinks locaux</td><td>⭐⭐⭐ Modéré</td><td>⭐⭐⭐⭐⭐ Très fort</td></tr>
-      <tr><td>Optimisation on-page (mots-clés locaux)</td><td>⭐⭐ Modéré</td><td>⭐⭐⭐⭐⭐ Très fort</td></tr>
-      <tr><td>Vitesse du site (Core Web Vitals)</td><td>⭐⭐ Modéré</td><td>⭐⭐⭐⭐ Fort</td></tr>
-      <tr><td>Signaux sociaux</td><td>⭐ Faible</td><td>⭐⭐ Modéré</td></tr>
+      <tr><td>Google Business Profile optimisé</td><td>Très fort</td><td>Modéré</td></tr>
+      <tr><td>Avis Google (quantité + note)</td><td>Très fort</td><td>Fort</td></tr>
+      <tr><td>Proximité géographique</td><td>Très fort</td><td>Faible</td></tr>
+      <tr><td>Cohérence des citations NAP</td><td>Fort</td><td>Fort</td></tr>
+      <tr><td>Backlinks locaux</td><td>Modéré</td><td>Très fort</td></tr>
+      <tr><td>Optimisation on-page (mots-clés locaux)</td><td>Modéré</td><td>Très fort</td></tr>
+      <tr><td>Vitesse du site (Core Web Vitals)</td><td>Modéré</td><td>Fort</td></tr>
+      <tr><td>Signaux sociaux</td><td>Faible</td><td>Modéré</td></tr>
     </tbody>
   </table>
 
@@ -171,7 +172,7 @@
   <ol>
     <li>Créez ou réclamez votre fiche Google Business Profile sur <a href="https://business.google.com" target="_blank" rel="noopener">business.google.com</a> si ce n'est pas encore fait</li>
     <li>Complétez votre fiche à 100% : catégories, horaires, description, photos (minimum 10)</li>
-    <li>Optimisez vos images avant de les uploader sur GMB et votre site — <a href="/"><strong>convertissez-les en WebP gratuitement</strong></a> pour améliorer votre vitesse de chargement</li>
+    <li>Optimisez vos images avant de les uploader sur GMB et votre site : <a href="/"><strong>convertissez-les en WebP gratuitement</strong></a> pour améliorer votre vitesse de chargement</li>
     <li>Demandez des avis à vos clients satisfaits en leur envoyant le lien direct vers votre fiche Google</li>
     <li>Créez au moins 3 citations sur des annuaires de référence : Pages Jaunes, Yelp, et un annuaire spécifique à votre secteur</li>
   </ol>
@@ -180,6 +181,9 @@
   <p>Le SEO local n'est pas réservé aux grandes entreprises avec des budgets marketing conséquents. C'est précisément l'inverse : c'est l'un des rares domaines où une PME bien organisée peut surclasser une grande enseigne, simplement en ayant plus d'avis, une fiche plus complète, et un site plus rapide.</p>
   <p>L'optimisation des images fait partie de ces petites actions à fort impact. Si vous n'avez pas encore converti vos images en WebP, c'est probablement l'action SEO la plus rapide que vous puissiez faire aujourd'hui, et elle est entièrement gratuite.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -187,7 +191,9 @@
       <li><a href="/blog/optimiser-images-vitesse-site-google">5 techniques pour optimiser vos images et booster la vitesse de votre site</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Optimisez vos images en WebP maintenant</h3>
     <p>La première étape de votre SEO local : des images légères pour un site rapide. Notre outil gratuit traite plusieurs fichiers simultanément et vous fournit un ZIP en quelques secondes.</p>
@@ -199,6 +205,4 @@
     <p style="margin:0 0 1rem; font-size:.95rem; color:#333;">Nos experts analysent gratuitement votre stratégie SEO locale et vous envoient un rapport personnalisé sous 48h.</p>
     <a href="/contact" class="btn btn-primary" style="display:inline-block;">Demandez votre audit SEO gratuit →</a>
   </aside>
-
-</article>
 {% endblock %}

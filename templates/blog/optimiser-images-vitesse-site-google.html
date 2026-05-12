@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}5 techniques pour optimiser vos images et votre PageSpeed{% endblock %}
 {% block description %}WebP, lazy loading, srcset, compression intelligente : guide complet pour optimiser vos images et booster votre score Google PageSpeed.{% endblock %}
@@ -45,7 +45,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -57,8 +57,9 @@
     <h1>5 techniques pour optimiser vos images<br>et booster la vitesse de votre site</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p>Les images représentent en moyenne <strong>65% du poids total d'une page web</strong>. Ce sont elles qui font le plus souffrir les temps de chargement et, par conséquent, votre positionnement sur Google. Pourtant, optimiser ses images reste l'un des leviers les plus sous-estimés du SEO technique. Dans ce guide, nous vous présentons 5 techniques concrètes pour réduire le poids de vos images sans sacrifier leur qualité et booster les performances de votre site.</p>
 
@@ -135,6 +136,9 @@
   <p>Avant et après vos optimisations, utilisez <a href="https://pagespeed.web.dev" target="_blank" rel="noopener">Google PageSpeed Insights</a> pour mesurer l'impact de vos actions. Cet outil analyse votre site et vous donne un score de 0 à 100 pour mobile et desktop, ainsi que des recommandations précises.</p>
   <p>Parmi les recommandations les plus fréquentes, vous trouverez : <em>"Diffusez des images dans des formats nouvelle génération"</em> : c'est exactement ce que permet la conversion en WebP. Un audit avant/après optimisation complète peut révéler un gain de <strong>20 à 40 points</strong> sur votre score de performance mobile.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -143,7 +147,9 @@
       <li><a href="/blog/webp-vs-jpg-png-comparaison">WebP vs JPG vs PNG : quel format choisir pour vos images web ?</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Commencez par convertir vos images en WebP</h3>
     <p>C'est la première étape, la plus rapide et la plus impactante. Notre outil gratuit traite plusieurs fichiers simultanément et vous fournit un ZIP téléchargeable en quelques secondes.</p>
@@ -155,6 +161,4 @@
     <p style="margin:0 0 1rem; font-size:.95rem; color:#333;">Recevez une analyse complète de votre site : Core Web Vitals, images, PageSpeed. Rapport personnalisé sous 48h, 100% gratuit.</p>
     <a href="/contact" class="btn btn-primary" style="display:inline-block;">Demandez votre audit SEO gratuit →</a>
   </aside>
-
-</article>
 {% endblock %}

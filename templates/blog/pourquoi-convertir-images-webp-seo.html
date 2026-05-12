@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}Convertir en WebP : essentiel pour votre SEO | ConvertWebP{% endblock %}
 {% block description %}Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre classement Google. Chiffres, études et conseils pratiques.{% endblock %}
@@ -45,7 +45,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -57,8 +57,9 @@
     <h1>Pourquoi convertir vos images en WebP<br>est essentiel pour votre SEO</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p>La vitesse de chargement des pages est devenue un critère déterminant pour le référencement naturel. Google l'a officiellement intégré à son algorithme avec les Core Web Vitals en 2021. Parmi tous les éléments qui ralentissent un site web, les images sont de loin les plus impactantes : elles représentent en moyenne 65% du poids total d'une page web. Convertir vos images au format WebP est l'une des actions les plus efficaces pour alléger vos pages et améliorer votre SEO.</p>
 
@@ -114,6 +115,9 @@
   <h3>Via les plugins CMS</h3>
   <p>Si vous utilisez WordPress, des plugins comme <strong>Imagify</strong>, <strong>ShortPixel</strong> ou <strong>WebP Express</strong> convertissent automatiquement vos images en WebP et gèrent le fallback. Sur Shopify, la conversion est désormais native. Sur Webflow, les images sont servies en WebP automatiquement.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -122,7 +126,9 @@
       <li><a href="/blog/optimiser-images-vitesse-site-google">5 techniques pour optimiser vos images et booster la vitesse de votre site</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Convertissez vos images en WebP maintenant</h3>
     <p>Notre outil gratuit convertit vos JPG et PNG en WebP en quelques secondes. Sans inscription, sans limite de fichiers, 100% en ligne.</p>
@@ -134,6 +140,4 @@
     <p style="margin:0 0 1rem; font-size:.95rem; color:#333;">Recevez une analyse complète de votre site : Core Web Vitals, images, PageSpeed. Rapport personnalisé sous 48h, 100% gratuit.</p>
     <a href="/contact" class="btn btn-primary" style="display:inline-block;">Demandez votre audit SEO gratuit →</a>
   </aside>
-
-</article>
 {% endblock %}

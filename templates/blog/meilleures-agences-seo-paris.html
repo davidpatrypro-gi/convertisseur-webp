@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "blog/article-base.html" %}
 
 {% block title %}Meilleures agences SEO à Paris en 2026 : comment choisir | ConvertWebP{% endblock %}
 {% block description %}Agence SEO à Paris : nos critères pour bien choisir, les erreurs à éviter et ce que vous pouvez optimiser vous-même. Guide complet 2026.{% endblock %}
@@ -47,7 +47,7 @@
 </script>
 {% endblock %}
 
-{% block content %}
+{% block article_hero %}
 <section class="article-hero">
   <div class="container">
     <nav class="breadcrumb">
@@ -59,8 +59,9 @@
     <h1>Meilleures agences SEO à Paris en 2026 :<br>comment choisir la bonne ?</h1>
   </div>
 </section>
+{% endblock %}
 
-<article class="article-body">
+{% block article_body %}
 
   <p><em>Vous cherchez une agence SEO à Paris et vous vous perdez dans une offre pléthorique ? C'est normal. La capitale concentre des centaines de prestataires, du freelance solo à la grande agence digitale internationale. Dans cet article, on vous donne les clés pour trier, comparer et choisir sans vous faire avoir.</em></p>
 
@@ -151,6 +152,9 @@
   <h3>Combien de temps pour des résultats SEO ?</h3>
   <p>En moyenne, 4 à 6 mois pour voir les premiers mouvements significatifs dans les positions. Les résultats en trafic suivent généralement 1 à 2 mois après. Le SEO est un investissement long terme, pas un levier d'acquisition immédiate.</p>
 
+{% endblock %}
+
+{% block article_related %}
   <aside class="article-related" aria-label="Articles connexes">
     <h3>À lire aussi</h3>
     <ul>
@@ -159,7 +163,9 @@
       <li><a href="/blog/optimiser-images-vitesse-site-google">5 techniques pour optimiser vos images et booster la vitesse de votre site</a></li>
     </ul>
   </aside>
+{% endblock %}
 
+{% block article_cta %}
   <div class="article-cta">
     <h3>Votre site est-il prêt pour une agence SEO ?</h3>
     <p>Avant de signer, obtenez un regard externe sur votre site : Core Web Vitals, images, PageSpeed. Rapport personnalisé sous 48h, 100 % gratuit.</p>
@@ -171,6 +177,4 @@
     <p style="margin:0 0 1rem;font-size:.95rem;color:#333;">La plupart des agences SEO commencent par recommander l'optimisation des images. Prenez de l'avance : convertissez vos visuels en WebP gratuitement, en quelques secondes.</p>
     <a href="/" class="btn btn-primary" style="display:inline-block;">Convertir mes images en WebP →</a>
   </aside>
-
-</article>
 {% endblock %}
