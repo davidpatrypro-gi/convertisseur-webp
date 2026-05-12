@@ -71,7 +71,7 @@
         <!-- Drop zone -->
         <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
              aria-label="Déposez ou cliquez pour uploader vos images">
-          <div class="drop-icon">🗜️</div>
+          <div class="drop-icon"></div>
           <h2>Déposez vos images ici</h2>
           <p>ou cliquez pour sélectionner vos fichiers</p>
           <input type="file" id="file-input"
@@ -84,7 +84,7 @@
         <!-- Compress button -->
         <button class="btn btn-primary btn-full hidden" id="convert-btn"
                 style="margin-top:1rem" type="button">
-          🗜️ Compresser les images
+          Compresser les images
         </button>
 
         <!-- File list -->
@@ -102,19 +102,19 @@
         <div class="hidden" id="stats-container">
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-label">📁 Poids original</div>
+              <div class="stat-label">Poids original</div>
               <div class="stat-value" id="stat-original">—</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">📦 Poids compressé</div>
+              <div class="stat-label">Poids compressé</div>
               <div class="stat-value" id="stat-converted">—</div>
             </div>
             <div class="stat-card stat-gain">
-              <div class="stat-label">💾 Gain total</div>
+              <div class="stat-label">Gain total</div>
               <div class="stat-value" id="stat-gain">—</div>
             </div>
             <div class="stat-card stat-gain">
-              <div class="stat-label">📉 Réduction</div>
+              <div class="stat-label">Réduction</div>
               <div class="stat-value" id="stat-pct">—</div>
             </div>
           </div>
@@ -122,7 +122,7 @@
           <!-- ZIP button -->
           <div class="zip-wrap hidden" id="zip-wrap">
             <button class="btn btn-success btn-full" id="zip-btn" type="button">
-              ⬇ Télécharger toutes les images en ZIP
+              Télécharger toutes les images en ZIP
             </button>
           </div>
         </div>
@@ -139,7 +139,7 @@
           <a href="/" style="color:#6c63ff;font-weight:600;">Convertissez en WebP pour −90% →</a>
         </p>
 
-        <h3>⚙️ Options de compression</h3>
+        <h3>Options de compression</h3>
         <div class="option-group">
           <div class="option-label">
             <span>Qualité</span>
@@ -174,17 +174,17 @@
     <p class="section-sub">Des images plus légères = un site plus rapide = un meilleur référencement.</p>
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon">⚡</div>
+        <div class="feature-icon"></div>
         <h3>Jusqu'à 80% plus léger</h3>
         <p>La compression JPG intelligente réduit le poids jusqu'à 80% sans perte de qualité visible à l'écran.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🔍</div>
+        <div class="feature-icon"></div>
         <h3>SEO amélioré</h3>
         <p>Google valorise la vitesse de chargement. Des images légères améliorent votre LCP et votre classement.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🗂️</div>
+        <div class="feature-icon"></div>
         <h3>Format conservé</h3>
         <p>JPG reste JPG, PNG reste PNG. Pas de changement de format, transparence PNG parfaitement préservée.</p>
       </div>
@@ -311,5 +311,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/compress.js?v=12" defer></script>
+<script src="/static/compress.js?v=13" defer></script>
 {% endblock %}

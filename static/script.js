@@ -54,7 +54,7 @@ fetch('/api/ping')
       banner.style.cssText =
         'font-size:.8rem;color:#a16207;background:#fef9c3;border-radius:6px;' +
         'padding:.4rem .75rem;margin-top:.5rem;text-align:center;';
-      banner.textContent = '⚠️ Serveur en cours de démarrage, première conversion peut prendre quelques secondes.';
+      banner.textContent = 'Serveur en cours de démarrage, première conversion peut prendre quelques secondes.';
       const dz = document.getElementById('drop-zone');
       if (dz) dz.after(banner);
       setTimeout(() => banner.remove(), 15000);
@@ -163,7 +163,7 @@ async function convertAll() {
   // Message de patience si une image volumineuse prend du temps
   const wakeTimer = setTimeout(() => {
     if (done < total) {
-      progressText.textContent = 'Traitement en cours, image volumineuse… ⏳';
+      progressText.textContent = 'Traitement en cours, image volumineuse…';
     }
   }, 10000);
 
@@ -274,7 +274,7 @@ function renderResult(r, originalFile) {
     <div class="result-footer">
       <span class="result-saving">Gain : ${fmtSize(saving)}</span>
       <button class="btn btn-sm btn-outline" data-name="${escHtml(r.webp_name)}">
-        ⬇ Télécharger
+        Télécharger
       </button>
     </div>`;
 
@@ -365,7 +365,7 @@ function showTpPopup(savedBytes) {
       <div class="tp-popup-cta">
         <a href="${TP_URL}" target="_blank" rel="noopener"
            class="tp-btn-review" id="tp-btn-review">
-          Laisser un avis ⭐
+          Laisser un avis
         </a>
       </div>
       <div class="tp-popup-logo">Trustpilot</div>
@@ -396,7 +396,7 @@ function closeTp(overlay) {
 async function downloadZip() {
   if (!uploadedFiles.length) return;
   zipBtn.disabled = true;
-  zipBtn.textContent = '⏳ Préparation du ZIP…';
+  zipBtn.textContent = 'Préparation du ZIP…';
   try {
     const fd = new FormData();
     uploadedFiles.forEach((f) => fd.append('files', f));
@@ -414,10 +414,10 @@ async function downloadZip() {
     const totalGain = convertedResults.reduce((s, r) => s + (r.original_size - r.converted_size), 0);
     scheduleTpPopup(totalGain);
   } catch (err) {
-    alert('⚠ ' + err.message);
+    alert(err.message);
   } finally {
     zipBtn.disabled = false;
-    zipBtn.textContent = '⬇ Télécharger toutes les images en ZIP';
+    zipBtn.textContent = 'Télécharger toutes les images en ZIP';
   }
 }
 
@@ -452,7 +452,7 @@ function showCrossPopup(retries = 5) {
   overlay.setAttribute('aria-modal', 'true');
   overlay.innerHTML = `
     <div class="tp-popup">
-      <div class="tp-popup-stars">🗜️</div>
+      <div class="tp-popup-stars"></div>
       <h2 class="tp-popup-title">Aller encore plus loin ?</h2>
       <p class="tp-popup-body">
         Vos nouvelles images WebP peuvent encore être allégées.<br>

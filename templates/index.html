@@ -147,7 +147,7 @@
         <!-- Drop zone -->
         <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
              aria-label="Déposez ou cliquez pour uploader vos images">
-          <div class="drop-icon">🖼️</div>
+          <div class="drop-icon"></div>
           <h2>Déposez vos images ici</h2>
           <p>ou cliquez pour sélectionner vos fichiers JPG / PNG</p>
           <input type="file" id="file-input" accept=".jpg,.jpeg,.png"
@@ -159,7 +159,7 @@
         <!-- Convert button -->
         <button class="btn btn-primary btn-full hidden" id="convert-btn"
                 style="margin-top:1rem" type="button">
-          ⚡ Convertir en WebP
+          Convertir en WebP
         </button>
 
         <!-- File list -->
@@ -177,19 +177,19 @@
         <div class="hidden" id="stats-container">
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-label">📁 Poids original</div>
+              <div class="stat-label">Poids original</div>
               <div class="stat-value" id="stat-original">—</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">🌐 Poids WebP</div>
+              <div class="stat-label">Poids WebP</div>
               <div class="stat-value" id="stat-converted">—</div>
             </div>
             <div class="stat-card stat-gain">
-              <div class="stat-label">💾 Gain total</div>
+              <div class="stat-label">Gain total</div>
               <div class="stat-value" id="stat-gain">—</div>
             </div>
             <div class="stat-card stat-gain">
-              <div class="stat-label">📉 Réduction</div>
+              <div class="stat-label">Réduction</div>
               <div class="stat-value" id="stat-pct">—</div>
             </div>
           </div>
@@ -197,7 +197,7 @@
           <!-- ZIP button -->
           <div class="zip-wrap hidden" id="zip-wrap">
             <button class="btn btn-success btn-full" id="zip-btn" type="button">
-              ⬇ Télécharger toutes les images en ZIP
+              Télécharger toutes les images en ZIP
             </button>
           </div>
         </div>
@@ -212,7 +212,7 @@
           Vous voulez compresser sans changer de format ?<br>
           <a href="/compresser-images" style="color:#6c63ff;font-weight:600;">Essayez notre compresseur d'images →</a>
         </p>
-        <h3>⚙️ Options de conversion</h3>
+        <h3>Options de conversion</h3>
         <div class="option-group">
           <div class="option-label">
             <span>Qualité WebP</span>
@@ -244,17 +244,17 @@
     <p class="section-sub">Le format WebP est recommandé par Google pour booster vos performances web.</p>
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon">⚡</div>
+        <div class="feature-icon"></div>
         <h3>Jusqu'à 90% plus léger</h3>
         <p>WebP offre une compression jusqu'à 34% meilleure que JPEG et 80% meilleure que PNG à qualité visuelle équivalente.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🔍</div>
+        <div class="feature-icon"></div>
         <h3>SEO amélioré</h3>
         <p>Google intègre la vitesse de chargement dans son algorithme. Des images légères = meilleur LCP = meilleur classement.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🌐</div>
+        <div class="feature-icon"></div>
         <h3>Compatible partout</h3>
         <p>97% des navigateurs supportent WebP en 2026 : Chrome, Firefox, Safari, Edge. Aucun problème de compatibilité.</p>
       </div>
@@ -269,7 +269,7 @@
     <p class="section-sub">Tout ce que vous devez savoir sur l'optimisation d'images.</p>
     <div class="blog-grid">
       <article class="blog-card">
-        <div class="blog-card-img" style="background:#EEF2FF">📈</div>
+        <div class="blog-card-img" style="background:#EEF2FF"></div>
         <div class="blog-card-body">
           <span class="blog-tag">SEO</span>
           <h3>Pourquoi convertir vos images en WebP est essentiel pour votre SEO</h3>
@@ -279,7 +279,7 @@
         </div>
       </article>
       <article class="blog-card">
-        <div class="blog-card-img" style="background:#F0FDF4">🔬</div>
+        <div class="blog-card-img" style="background:#F0FDF4"></div>
         <div class="blog-card-body">
           <span class="blog-tag">Comparatif</span>
           <h3>WebP vs JPG vs PNG : quel format choisir pour vos images web ?</h3>
@@ -289,7 +289,7 @@
         </div>
       </article>
       <article class="blog-card">
-        <div class="blog-card-img" style="background:#FFF7ED">🚀</div>
+        <div class="blog-card-img" style="background:#FFF7ED"></div>
         <div class="blog-card-body">
           <span class="blog-tag">Performance</span>
           <h3>5 techniques pour optimiser vos images et booster la vitesse de votre site</h3>
@@ -514,5 +514,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="/static/script.js?v=9" defer></script>
+<script src="/static/script.js?v=10" defer></script>
 {% endblock %}

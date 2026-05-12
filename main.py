@@ -426,7 +426,6 @@ BLOG_POSTS = [
         "title":        "Meilleures agences SEO à Paris en 2026 : comment choisir la bonne ?",
         "description":  "Nos critères pour bien choisir votre agence SEO à Paris, les erreurs à éviter et ce que vous pouvez optimiser vous-même. Guide complet 2026.",
         "tag":          "SEO Local",
-        "emoji":        "🏙️",
         "bg":           "#EFF6FF",
         "published_at": date(2026, 5, 10),
         "lastmod":      "2026-05-10",
@@ -437,7 +436,6 @@ BLOG_POSTS = [
         "title":        "Meilleures agences SEO à Toulouse en 2026 : notre sélection",
         "description":  "Vizion, freelances, agences généralistes : notre sélection d'agences SEO à Toulouse avec les critères pour faire le bon choix.",
         "tag":          "SEO Local",
-        "emoji":        "🌹",
         "bg":           "#FFF1F2",
         "published_at": date(2026, 5, 14),
         "lastmod":      "2026-05-14",
@@ -448,7 +446,6 @@ BLOG_POSTS = [
         "title":        "Compresser ses images : le levier SEO le plus sous-estimé de 2026",
         "description":  "Pourquoi compresser vos images JPG et PNG booste directement votre LCP, votre score PageSpeed et votre classement Google. Guide complet avec exemples chiffrés.",
         "tag":          "SEO & Performance",
-        "emoji":        "🗜️",
         "bg":           "#F0EEFF",
         "published_at": date(2026, 5, 4),
         "lastmod":      "2026-05-04",
@@ -459,7 +456,6 @@ BLOG_POSTS = [
         "title":        "SEO Local en 2026 : Le Guide Complet pour Dominer Google dans Votre Ville",
         "description":  "Google Business Profile, Core Web Vitals, images WebP, citations NAP : tout ce qu'il faut pour apparaître en premier dans les recherches locales.",
         "tag":          "SEO Local",
-        "emoji":        "📍",
         "bg":           "#ECFDF5",
         "published_at": date(2026, 4, 27),
         "lastmod":      "2026-04-27",
@@ -470,7 +466,6 @@ BLOG_POSTS = [
         "title":        "Pourquoi convertir vos images en WebP est essentiel pour votre SEO",
         "description":  "Découvrez l'impact du format WebP sur vos Core Web Vitals, votre LCP et votre positionnement Google. Chiffres et conseils pratiques.",
         "tag":          "SEO",
-        "emoji":        "📈",
         "bg":           "#EEF2FF",
         "published_at": date(2026, 4, 24),
         "lastmod":      "2026-04-24",
@@ -481,7 +476,6 @@ BLOG_POSTS = [
         "title":        "WebP vs JPG vs PNG : quel format choisir pour vos images web ?",
         "description":  "Comparaison complète des trois formats d'image dominants du web. Tableau de synthèse, cas d'usage et recommandations selon votre situation.",
         "tag":          "Comparatif",
-        "emoji":        "🔬",
         "bg":           "#F0FDF4",
         "published_at": date(2026, 4, 24),
         "lastmod":      "2026-04-24",
@@ -492,7 +486,6 @@ BLOG_POSTS = [
         "title":        "5 techniques pour optimiser vos images et booster la vitesse de votre site",
         "description":  "WebP, lazy loading, srcset, redimensionnement et compression intelligente : le guide complet pour des images parfaitement optimisées.",
         "tag":          "Performance",
-        "emoji":        "🚀",
         "bg":           "#FFF7ED",
         "published_at": date(2026, 4, 24),
         "lastmod":      "2026-04-24",
@@ -641,7 +634,7 @@ async def api_contact(form: ContactForm):
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
       <div style="background:#6c63ff;padding:16px 24px;border-radius:8px 8px 0 0;">
         <h1 style="color:white;margin:0;font-size:1.25rem;">
-          🎯 Nouvelle demande d'audit SEO
+          Nouvelle demande d'audit SEO
         </h1>
       </div>
       <div style="background:#f9f9ff;border:1px solid #e0dbff;border-top:none;
@@ -684,7 +677,7 @@ async def api_contact(form: ContactForm):
       <div style="background:#ffffff;border:1px solid #e0dbff;border-top:none;
                   border-radius:0 0 8px 8px;padding:28px;">
         <h2 style="color:#1a1a2e;margin-top:0;">
-          Votre demande d'audit a bien été reçue ✅
+          Votre demande d'audit a bien été reçue
         </h2>
         <p style="color:#444;">Bonjour {form.name},</p>
         <p style="color:#444;">
@@ -706,7 +699,7 @@ async def api_contact(form: ContactForm):
           <a href="https://convertwebp.fr"
              style="background:#6c63ff;color:white;padding:12px 24px;
                     border-radius:6px;text-decoration:none;font-weight:700;">
-            ⚡ Convertir mes images en WebP
+            Convertir mes images en WebP
           </a>
         </p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
