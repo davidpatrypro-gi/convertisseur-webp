@@ -109,8 +109,9 @@ async def add_performance_headers(request: Request, call_next):
     if path.startswith("/static/"):
         ext = path.rsplit('.', 1)[-1].lower() if '.' in path else ''
         if ext in ('js', 'css'):
-            # JS/CSS : 1h — on les met à jour souvent, immutable interdirait les MAJ
-            response.headers["Cache-Control"] = "public, max-age=3600"
+            # JS/CSS : 1 an immutable — les fichiers sont versionnés (?v=2, ?v=10)
+            # donc une MAJ = nouveau numéro de version = nouveau cache sans conflits
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
         else:
             # Images, fonts, ico : cache 1 an immuable (ne changent jamais)
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
