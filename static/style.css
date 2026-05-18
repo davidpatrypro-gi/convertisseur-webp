@@ -556,6 +556,24 @@ a:hover { text-decoration: underline; }
 .article-share-copy:hover  { background: var(--bg); color: var(--text); border-color: #aaa; }
 .article-share-copy.copied { background: var(--success-bg); color: var(--success); border-color: #6EE7B7; }
 
+/* ── CTA bouton inline article ───────────────────────────────────────────────── */
+.btn-cta-article {
+  display: block;
+  width: 100%;
+  background-color: #6c63ff;
+  color: #ffffff;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 2rem 0;
+  transition: background-color 0.2s ease;
+  box-sizing: border-box;
+}
+.btn-cta-article:hover { background-color: #5a52d5; color: #ffffff; text-decoration: none; }
+
 /* ── Blog index ──────────────────────────────────────────────────────────────── */
 .blog-hero { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; padding: 3.5rem 0; text-align: center; }
 .blog-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: .75rem; }

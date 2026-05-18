@@ -423,6 +423,16 @@ async def _stream_buf(buf: io.BytesIO) -> AsyncGenerator[bytes, None]:
 
 BLOG_POSTS = [
     {
+        "slug":         "reduire-taille-image",
+        "title":        "Réduire la taille de ses images : 4 méthodes efficaces pour alléger votre site",
+        "description":  "Compression, WebP, redimensionnement, lazy loading : 4 méthodes concrètes pour alléger vos images JPG et PNG et booster votre SEO.",
+        "tag":          "SEO & Performance",
+        "bg":           "#F0EEFF",
+        "published_at": date(2026, 5, 18),
+        "lastmod":      "2026-05-18",
+        "priority":     "0.8",
+    },
+    {
         "slug":         "meilleures-agences-seo-paris",
         "title":        "Meilleures agences SEO à Paris en 2026 : comment choisir la bonne ?",
         "description":  "Nos critères pour bien choisir votre agence SEO à Paris, les erreurs à éviter et ce que vous pouvez optimiser vous-même. Guide complet 2026.",
@@ -537,6 +547,14 @@ async def politique_confidentialite(request: Request):
 async def blog(request: Request):
     published = [p for p in BLOG_POSTS if _is_published(p)]
     return templates.TemplateResponse(request, "blog/index.html", {"blog_posts": published})
+
+
+@app.get("/blog/reduire-taille-image", response_class=HTMLResponse)
+async def blog_reduire_taille_image(request: Request):
+    post = next((p for p in BLOG_POSTS if p["slug"] == "reduire-taille-image"), None)
+    if not post or not _is_published(post):
+        raise HTTPException(status_code=404)
+    return templates.TemplateResponse(request, "blog/reduire-taille-image.html")
 
 
 @app.get("/blog/pourquoi-convertir-images-webp-seo", response_class=HTMLResponse)
