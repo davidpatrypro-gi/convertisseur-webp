@@ -1,13 +1,17 @@
 {% extends "blog/article-base.html" %}
 
 {% block title %}Réduire la taille de ses images : 4 méthodes efficaces | ConvertWebP{% endblock %}
-{% block description %}Réduire la taille de vos images JPG et PNG en quelques clics. Compression, WebP, redimensionnement : 4 méthodes concrètes pour alléger votre site et booster votre SEO.{% endblock %}
+{% block description %}4 méthodes pour réduire la taille de vos images JPG et PNG : compression, WebP, redimensionnement, lazy loading. Allégez votre site et boostez votre SEO.{% endblock %}
 {% block canonical %}https://convertwebp.fr/blog/reduire-taille-image{% endblock %}
 {% block og_title %}Réduire la taille de ses images : 4 méthodes efficaces | ConvertWebP{% endblock %}
 {% block og_description %}Compression, WebP, redimensionnement, lazy loading : 4 méthodes concrètes pour alléger vos images et booster votre SEO.{% endblock %}
 {% block og_url %}https://convertwebp.fr/blog/reduire-taille-image{% endblock %}
 {% block tw_title %}Réduire la taille de ses images : 4 méthodes efficaces | ConvertWebP{% endblock %}
 {% block tw_description %}Compression, WebP, redimensionnement, lazy loading : 4 méthodes concrètes pour alléger vos images et booster votre SEO.{% endblock %}
+
+{% block extra_head %}
+<meta name="keywords" content="réduire taille image, compresser image, optimiser images web, webp, compression jpg png, alléger site web, réduire poids image">
+{% endblock %}
 
 {% block json_ld %}
 <script type="application/ld+json">
@@ -26,7 +30,7 @@
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": "Réduire la taille de ses images : 4 méthodes efficaces pour alléger votre site",
-  "description": "Réduire la taille de vos images JPG et PNG en quelques clics. Compression, WebP, redimensionnement : 4 méthodes concrètes pour alléger votre site et booster votre SEO.",
+  "description": "4 méthodes pour réduire la taille de vos images JPG et PNG : compression, WebP, redimensionnement, lazy loading. Allégez votre site et boostez votre SEO.",
   "url": "https://convertwebp.fr/blog/reduire-taille-image",
   "datePublished": "2026-05-18",
   "dateModified": "2026-05-18",
@@ -67,13 +71,13 @@
     ⚡ Réduire mes images maintenant →
   </a>
 
-  <p>Des images trop lourdes, c'est l'un des problèmes les plus fréquents sur les sites web — et l'un des plus coûteux en termes de performance. Un site qui charge lentement perd des visiteurs, pénalise son score PageSpeed et recule dans les résultats Google. La bonne nouvelle : réduire la taille de ses images ne demande ni compétence technique avancée, ni logiciel payant. Il existe quatre méthodes simples, efficaces, applicables dès aujourd'hui.</p>
+  <p>Des images trop lourdes, c'est l'un des problèmes les plus fréquents sur les sites web, et l'un des plus coûteux en termes de performance. Un site qui charge lentement perd des visiteurs, pénalise son score PageSpeed et recule dans les résultats Google. La bonne nouvelle : réduire la taille de ses images ne demande ni compétence technique avancée, ni logiciel payant. Il existe quatre méthodes simples, efficaces, applicables dès aujourd'hui.</p>
 
   <h2>Pourquoi réduire la taille de vos images est indispensable</h2>
 
   <p>Les images représentent en moyenne <strong>60 à 70% du poids total d'une page web</strong>. C'est souvent là que se cachent les secondes de chargement perdues qui font fuir vos visiteurs et dégradent votre référencement.</p>
 
-  <p>Google évalue la vitesse de chargement via ses <strong>Core Web Vitals</strong>, et notamment le LCP (Largest Contentful Paint) — le temps que met votre image principale à s'afficher. Si cette image pèse 2 Mo, votre LCP s'effondre, et votre position dans les résultats de recherche avec.</p>
+  <p>Google évalue la vitesse de chargement via ses <strong>Core Web Vitals</strong>, et notamment le LCP (Largest Contentful Paint) : le temps que met votre image principale à s'afficher. Si cette image pèse 2 Mo, votre LCP s'effondre, et votre position dans les résultats de recherche avec.</p>
 
   <p>Concrètement, réduire le poids de vos images c'est :</p>
   <ul>
@@ -86,21 +90,21 @@
 
   <p>Voyons maintenant les quatre méthodes concrètes pour y arriver.</p>
 
-  <h2>Méthode 1 — La compression d'image</h2>
+  <h2>Méthode 1 : La compression d'image</h2>
 
-  <p>C'est la méthode la plus directe. Elle consiste à réduire le poids d'une image en éliminant les données superflues — métadonnées EXIF, données de couleur inutiles — sans toucher au format ni aux dimensions.</p>
+  <p>C'est la méthode la plus directe. Elle consiste à réduire le poids d'une image en éliminant les données superflues, comme les métadonnées EXIF et les données de couleur inutiles, sans toucher au format ni aux dimensions.</p>
 
   <p>Il existe deux types de compression :</p>
 
   <p><strong>La compression sans perte (lossless)</strong> supprime uniquement les métadonnées et optimise l'encodage interne du fichier. La qualité visuelle reste identique à l'œil nu. Idéale pour les logos, icônes et illustrations.</p>
 
-  <p><strong>La compression avec perte (lossy)</strong> réduit davantage le poids en dégradant légèrement la qualité. À un niveau de compression raisonnable (qualité 60-80%), la différence est imperceptible pour un visiteur — mais le gain de poids est significatif, souvent 40 à 70%.</p>
+  <p><strong>La compression avec perte (lossy)</strong> réduit davantage le poids en dégradant légèrement la qualité. À un niveau de compression raisonnable (qualité 60-80%), la différence est imperceptible pour un visiteur, mais le gain de poids est significatif, souvent 40 à 70%.</p>
 
   <p>Notre <a href="/compresser-images" style="color:#6c63ff;font-weight:600;">outil de compression d'images gratuit</a> vous permet de compresser vos JPG et PNG en quelques secondes, sans changer le format d'origine. Vous choisissez le niveau de qualité via un slider et vous voyez le résultat avant de télécharger.</p>
 
-  <h2>Méthode 2 — Changer de format : passer en WebP</h2>
+  <h2>Méthode 2 : Changer de format et passer en WebP</h2>
 
-  <p>C'est souvent la méthode qui donne les gains les plus spectaculaires. Le <strong>format WebP</strong>, développé par Google, est conçu spécifiquement pour le web — il compresse beaucoup plus efficacement que le JPG ou le PNG, à qualité visuelle identique.</p>
+  <p>C'est souvent la méthode qui donne les gains les plus spectaculaires. Le <strong>format WebP</strong>, développé par Google, est conçu spécifiquement pour le web : il compresse beaucoup plus efficacement que le JPG ou le PNG, à qualité visuelle identique.</p>
 
   <p>Les chiffres sont sans appel :</p>
   <ul>
@@ -116,9 +120,9 @@
 
   <p>C'est la méthode que recommandent Google dans ses guidelines PageSpeed et tous les auditeurs SEO sérieux comme premier levier d'optimisation.</p>
 
-  <h2>Méthode 3 — Le redimensionnement</h2>
+  <h2>Méthode 3 : Le redimensionnement</h2>
 
-  <p>Une erreur très fréquente : uploader une image en 4000×3000 pixels alors qu'elle sera affichée dans une colonne de 800 pixels de large. Le navigateur charge l'image en pleine résolution, puis la redimensionne à l'affichage — vous payez le poids sans le bénéfice.</p>
+  <p>Une erreur très fréquente : uploader une image en 4000×3000 pixels alors qu'elle sera affichée dans une colonne de 800 pixels de large. Le navigateur charge l'image en pleine résolution, puis la redimensionne à l'affichage. Vous payez le poids sans le bénéfice.</p>
 
   <p>La règle est simple : <strong>ne uploadez jamais une image plus large que la largeur d'affichage maximale sur votre site.</strong></p>
 
@@ -128,16 +132,16 @@
 
   <p>Outils recommandés pour redimensionner :</p>
   <ul>
-    <li><strong>Photoshop / GIMP</strong> — pour un contrôle précis</li>
-    <li><strong>Squoosh</strong> (squoosh.app) — outil en ligne gratuit de Google, très complet</li>
-    <li><strong>Canva</strong> — si vous créez vos visuels directement aux bonnes dimensions</li>
+    <li><strong>Photoshop / GIMP</strong> : pour un contrôle précis</li>
+    <li><strong>Squoosh</strong> (squoosh.app) : outil en ligne gratuit de Google, très complet</li>
+    <li><strong>Canva</strong> : si vous créez vos visuels directement aux bonnes dimensions</li>
   </ul>
 
-  <h2>Méthode 4 — Le lazy loading</h2>
+  <h2>Méthode 4 : Le lazy loading</h2>
 
-  <p>Le lazy loading n'est pas une technique de réduction de poids à proprement parler — mais elle réduit ce que le navigateur charge au premier affichage, ce qui revient au même pour votre LCP et votre performance perçue.</p>
+  <p>Le lazy loading n'est pas une technique de réduction de poids à proprement parler, mais elle réduit ce que le navigateur charge au premier affichage, ce qui revient au même pour votre LCP et votre performance perçue.</p>
 
-  <p>Le principe : les images situées hors de l'écran visible (below the fold) ne sont chargées que lorsque l'utilisateur scrolle jusqu'à elles. Au lieu de charger 20 images au chargement de la page, le navigateur n'en charge que 3 ou 4 — celles visibles immédiatement.</p>
+  <p>Le principe : les images situées hors de l'écran visible (below the fold) ne sont chargées que lorsque l'utilisateur scrolle jusqu'à elles. Au lieu de charger 20 images au chargement de la page, le navigateur n'en charge que 3 ou 4, celles visibles immédiatement.</p>
 
   <p>L'implémentation est triviale en HTML moderne :</p>
 
@@ -145,7 +149,7 @@
 
   <p>L'attribut <code>loading="lazy"</code> est supporté nativement par tous les navigateurs modernes. Pas de JavaScript, pas de bibliothèque externe.</p>
 
-  <p><strong>Important :</strong> n'appliquez jamais le lazy loading à l'image principale de votre page (hero image, première image visible) — vous feriez exactement l'inverse de ce que vous cherchez et vous pénaliseriez votre LCP.</p>
+  <p><strong>Important :</strong> n'appliquez jamais le lazy loading à l'image principale de votre page (hero image, première image visible). Vous feriez exactement l'inverse de ce que vous cherchez et vous pénaliseriez votre LCP.</p>
 
   <p>Pour aller plus loin sur ces techniques d'optimisation, notre article <a href="/blog/optimiser-images-vitesse-site-google" style="color:#6c63ff;font-weight:600;">5 techniques pour optimiser vos images et booster la vitesse de votre site</a> couvre en détail le lazy loading, le srcset et d'autres bonnes pratiques.</p>
 
@@ -171,7 +175,7 @@
 
   <h2>L'impact sur votre SEO</h2>
 
-  <p>Réduire la taille de vos images n'est pas qu'une question de confort utilisateur — c'est un signal direct pour Google.</p>
+  <p>Réduire la taille de vos images n'est pas qu'une question de confort utilisateur : c'est un signal direct pour Google.</p>
 
   <p>Depuis 2021, les <strong>Core Web Vitals</strong> sont officiellement intégrés dans l'algorithme de ranking de Google. Le LCP (vitesse d'affichage du contenu principal), le CLS (stabilité visuelle) et l'INP (réactivité) sont mesurés et pris en compte dans votre positionnement.</p>
 
@@ -179,12 +183,12 @@
 
   <p>Les outils pour mesurer l'impact de vos images :</p>
   <ul>
-    <li><strong>Google PageSpeed Insights</strong> — analyse gratuite de n'importe quelle URL</li>
-    <li><strong>Google Search Console</strong> — rapport Core Web Vitals pour l'ensemble de votre site</li>
-    <li><strong>WebPageTest</strong> — analyse détaillée avec waterfall chart</li>
+    <li><strong>Google PageSpeed Insights</strong> : analyse gratuite de n'importe quelle URL</li>
+    <li><strong>Google Search Console</strong> : rapport Core Web Vitals pour l'ensemble de votre site</li>
+    <li><strong>WebPageTest</strong> : analyse détaillée avec waterfall chart</li>
   </ul>
 
-  <p>Si vous voulez un regard extérieur sur la situation de votre site, vous pouvez demander un <a href="/contact" style="color:#6c63ff;font-weight:600;">audit SEO gratuit sur ConvertWebP</a> — nous analysons vos images, votre score PageSpeed et vos Core Web Vitals et vous envoyons un rapport personnalisé sous 48h.</p>
+  <p>Si vous voulez un regard extérieur sur la situation de votre site, vous pouvez demander un <a href="/contact" style="color:#6c63ff;font-weight:600;">audit SEO gratuit sur ConvertWebP</a> : nous analysons vos images, votre score PageSpeed et vos Core Web Vitals et vous envoyons un rapport personnalisé sous 48h.</p>
 
   <h2>En résumé</h2>
 
